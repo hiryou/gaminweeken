@@ -109,7 +109,7 @@ graph TB
         subgraph sgraph_Occultist[ ]
             direction TB
             
-            hero_Occultist(Occultist<br>#9876; #8982;#8982;#8982;<br><u>heal</u>: ?+++)
+            hero_Occultist(Occultist<br>#9876; #8982;#8982;#8982;<br><u>heal</u>: ?++)
             Occultist_buff@{ shape: procs, label: " "}
             Occultist_debuff@{ shape: procs, label: "-dmg,prot"}
             hero_Occultist ---> Occultist_buff & Occultist_debuff
@@ -149,7 +149,7 @@ graph TB
             direction TB
             
             hero_HoundMaster([#9022; #9022; <br>HoundMaster<br>#9876; #8982;#8982;#8982;])
-            HoundMaster_buff@{ shape: procs, label: "++dod<br>-stress"}
+            HoundMaster_buff@{ shape: procs, label: "++dod<br>---stress"}
             HoundMaster_debuff@{ shape: procs, label: "-prot"}
             hero_HoundMaster ---> HoundMaster_buff & HoundMaster_debuff
         
@@ -162,13 +162,26 @@ graph TB
             direction TB
             
             hero_Arbalest(#9022; #9022; <br>Arbalest<br>#8982;#8982;#8982;#8982;<br><u>heal</u>: ++)
-            Arbalest_buff@{ shape: procs, label: "+spd<br>---stunned<br>---marked"}
-            Arbalest_debuff@{ shape: procs, label: "-acc,crt<br>-dod<br>de_stealth"}
+            Arbalest_buff@{ shape: procs, label: "+spd<br>--stunned<br>--marked"}
+            Arbalest_debuff@{ shape: procs, label: "-acc,crt<br>-dod<br>-stealth"}
             hero_Arbalest ---> Arbalest_buff & Arbalest_debuff
         
             class hero_Arbalest nodeHeroTitle;
             class Arbalest_buff nodeBuff;
             class Arbalest_debuff nodeDebuff;
+        end
+        
+        subgraph sgraph_Musketeer[ ]
+            direction TB
+            
+            hero_Musketeer(#9022; #9022; <br>Musketeer<br>#8982;#8982;#8982;#8982;<br><u>heal</u>: +)
+            Musketeer_buff@{ shape: procs, label: "+spd(self)<br>--stunned<br>--marked"}
+            Musketeer_debuff@{ shape: procs, label: "-acc,crt<br>-dod"}
+            hero_Musketeer ---> Musketeer_buff & Musketeer_debuff
+        
+            class hero_Musketeer nodeHeroTitle;
+            class Musketeer_buff nodeBuff;
+            class Musketeer_debuff nodeDebuff;
         end
         
         subgraph sgraph_Antiquarian[ ]
@@ -187,9 +200,9 @@ graph TB
         subgraph sgraph_Vestal[ ]
             direction TB
             
-            hero_Vestal(Vestal<br>#9876; #8982;#8982;#8982;<br><u>heal</u>: +++)
+            hero_Vestal(Vestal<br>#9876; #8982;#8982;#8982;<br><u>heal</u>: ++)
             Vestal_buff@{ shape: procs, label: " "}
-            Vestal_debuff@{ shape: procs, label: "de_stealth<br>-dod"}
+            Vestal_debuff@{ shape: procs, label: "-stealth<br>-dod"}
             hero_Vestal ---> Vestal_buff & Vestal_debuff
         
             class hero_Vestal nodeHeroTitle;
@@ -228,7 +241,7 @@ graph TB
             
             hero_Shieldbreaker([#9022; <br>Shieldbreaker<br>#9876;#9876; #8982;#8982;])
             Shieldbreaker_buff@{ shape: procs, label: "+spd(self)"}
-            Shieldbreaker_debuff@{ shape: procs, label: "-spd<br>de_stealth"}
+            Shieldbreaker_debuff@{ shape: procs, label: "-spd<br>-stealth"}
             hero_Shieldbreaker ---> Shieldbreaker_buff & Shieldbreaker_debuff
         
             class hero_Shieldbreaker nodeHeroTitle;
@@ -267,7 +280,7 @@ graph TB
             
             hero_Hwyman([#9022; <br>Highwayman<br>#9876;#9876; #8982;#8982;])
             Hwyman_buff@{ shape: procs, label: "(SELF)<br>+acc,crit,dmg<br>-dmg"}
-            Hwyman_debuff@{ shape: procs, label: "+++crit"}
+            Hwyman_debuff@{ shape: procs, label: "++crit<br>-stealth"}
             hero_Hwyman ---> Hwyman_buff & Hwyman_debuff
         
             class hero_Hwyman nodeHeroTitle;
@@ -342,7 +355,9 @@ graph TB
         sgraph_HoundMaster _stun_5@o--o stun
         
         sgraph_Arbalest _mark_4@o--o mark
-        %% sgraph_Arbalest --- de_stealth
+        
+        mark _mark_5@o--o sgraph_Musketeer 
+        %% sgraph_Musketeer o--o knock
         
         sgraph_Antiquarian _blight_4@-.- blight
         
@@ -352,7 +367,7 @@ graph TB
         
         riposte --- sgraph_ManatArms
         guard _guard_2@---|self_+prot| sgraph_ManatArms
-        %% sgraph_ManatArms _mark_5@o-.-o|passive| mark
+        %% sgraph_ManatArms _mark_6@o-.-o|passive| mark
         sgraph_ManatArms _stun_8@o--o|#8680;1| stun
         sgraph_ManatArms _shuffle_3@o--o shuffle
         
@@ -373,7 +388,7 @@ graph TB
         class _blight_1,_blight_2,_blight_3,_blight_4,_blight_5 edgeBlight;
         class _stun_1,_stun_2,_stun_3,_stun_4,_stun_5,_stun_6,_stun_7,_stun_8,_stun_9,_stun_10 edgeStun;
         class _bleed_1,_bleed_2,_bleed_3,_bleed_4,_bleed_5,_bleed_6,_bleed_7,_bleed_8 edgeBleed;
-        class _mark_1,_mark_2,_mark_3,_mark_4,_mark_5 edgeMark;
+        class _mark_1,_mark_2,_mark_3,_mark_4,_mark_5,_mark_6,_mark_7,_mark_8 edgeMark;
         class _pull_1,_pull_2,_pull_3,_pull_4,_pull_5 edgePull;
         
         %% format curve type for some links between heroes <-> actions to prettify the diagram
@@ -387,6 +402,8 @@ graph TB
         _mark_2@{ curve: linear }
         _mark_3@{ curve: linear }
         _mark_4@{ curve: linear }
+        _mark_5@{ curve: linear }
+        _mark_6@{ curve: linear }
         %% _pull_1@{ curve: step }
         %% _pull_2@{ curve: step }
         _blight_1@{ curve: catmullRom }
@@ -413,6 +430,7 @@ graph TB
     class sgraph_GraveRobber sgraphHeroPlain;
     class sgraph_HoundMaster sgraphHeroHealSelf;
     class sgraph_Arbalest sgraphHeroHeal;
+    class sgraph_Musketeer sgraphHeroHeal;
     class sgraph_Antiquarian sgraphHeroHealSml;
     class sgraph_Vestal sgraphHeroHeal;
     class sgraph_Crusader sgraphHeroHeal;
@@ -463,6 +481,7 @@ graph TB
         _HoundMaster([#9022; #9022; <br>HoundMaster])
         _GraveRobber([#9022; #9022; #9022; <br>GraveRobber])
         _Arbalest([#9022; #9022; <br>Arbalest])
+        _Musketeer([#9022; #9022; <br>Musketeer])
         _Shieldbreaker([#9022; <br>Shieldbreaker])
         
         _GraveRobber ~~~ _BountyHunter & _HoundMaster
@@ -471,6 +490,7 @@ graph TB
         %% css styling hero nodes %%
         class _HoundMaster nodeHealSelf;
         class _Arbalest nodeHeal;
+        class _Musketeer nodeHeal;
         class _Hwyman nodeHeroPlain
         class _BountyHunter nodeHeroPlain
         class _GraveRobber nodeHeroPlain
@@ -487,6 +507,7 @@ graph TB
         marked _mark_104@---o|+<br>+| _HoundMaster
         marked _mark_105@---o|+<br>+| _Arbalest
         marked _mark_106@-.-o|+<br>+| _Shieldbreaker
+        marked _mark_107@---o|+<br>+| _Musketeer
         %% bled _bleed_101@---o|+<br>+| _HoundMaster
         
         %% styling
