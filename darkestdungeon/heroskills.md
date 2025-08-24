@@ -23,6 +23,7 @@ graph TB
     classDef nodeHealSelf stroke:#5343e8,fill:#5343e8;
     
     classDef nodeHeroTitle stroke:#151517,fill:none,stroke-width:4px;
+    classDef nodeHeroTeam stroke:#151517,fill:#8817ad,stroke-width:16px;
     classDef nodeHeroPlain stroke:#151517,fill:grey,stroke-width:4px;
     
     classDef sgraphHeroPlain color:#2c3291,fill:grey,rx:50,ry:50;
@@ -148,12 +149,12 @@ graph TB
         subgraph sgraph_HoundMaster[ ]
             direction TB
             
-            hero_HoundMaster([#9022; #9022; <br>HoundMaster<br>#9876; #8982;#8982;#8982;])
+            hero_HoundMaster@{ shape: docs, label: "#9022; #9022; <br>HoundMaster<br>#9876; #8982;#8982;#8982;"}
             HoundMaster_buff@{ shape: procs, label: "++dod<br>---stress"}
             HoundMaster_debuff@{ shape: procs, label: "-prot"}
             hero_HoundMaster ---> HoundMaster_buff & HoundMaster_debuff
         
-            class hero_HoundMaster nodeHeroTitle;
+            class hero_HoundMaster nodeHeroTeam;
             class HoundMaster_buff nodeBuff;
             class HoundMaster_debuff nodeDebuff;
         end
@@ -187,12 +188,12 @@ graph TB
         subgraph sgraph_Antiquarian[ ]
             direction TB
             
-            hero_Antiquarian(Antiquarian<br>#9876; #8982;#8982;<br><u>heal</u>: sml)
+            hero_Antiquarian@{ shape: docs, label: "Antiquarian<br>#9876; #8982;#8982;<br><u>heal</u>: sml"}
             Antiquarian_buff@{ shape: procs, label: "+++dod<br>+prot(self)<br>"}
             Antiquarian_debuff@{ shape: procs, label: "-acc"}
             hero_Antiquarian ---> Antiquarian_buff & Antiquarian_debuff
         
-            class hero_Antiquarian nodeHeroTitle;
+            class hero_Antiquarian nodeHeroTeam;
             class Antiquarian_buff nodeBuff;
             class Antiquarian_debuff nodeDebuff;
         end
@@ -226,12 +227,13 @@ graph TB
         subgraph sgraph_ManatArms[ ]
             direction TB
             
-            hero_ManatArms([Man-at-Arms<br>#9876;#9876;#9876; #8982;])
+            hero_ManatArms@{ shape: docs, label: "Man_at_Arms<br>#9876;#9876;#9876; #8982;"}
+            %% hero_ManatArms([Man-at-Arms<br>#9876;#9876;#9876; #8982;])
             ManatArms_buff@{ shape: procs, label: "+++acc,crt<br>++prot,dmg<br>+++dod,<br>---stress"}
             ManatArms_debuff@{ shape: procs, label: "---dod,<br>---spd,<br>+crit<br>-dmg"}
             hero_ManatArms ---> ManatArms_buff & ManatArms_debuff
-        
-            class hero_ManatArms nodeHeroTitle;
+            
+            class hero_ManatArms nodeHeroTeam;
             class ManatArms_buff nodeBuff;
             class ManatArms_debuff nodeDebuff;
         end
@@ -265,12 +267,13 @@ graph TB
         subgraph sgraph_Jester[ ]
             direction TB
             
-            hero_Jester([__Jester__<br>#9876;#9876;#9876; #8982;])
-            Jester_buff@{ shape: procs, label: "+++acc,spd,<br>+++crit<br>--stress<br><i>FINALE:</i><br>-dod,spd,<br>+stress(self)"}
+            hero_Jester@{ shape: docs, label: "__Jester__<br>#9876;#9876;#9876; #8982;"}
+            %% Jester_buff@{ shape: procs, label: "+++acc,spd,<br>+++crit<br>--stress<br><i>FINALE:</i>-dod,spd,+stress(self)"}
+            Jester_buff@{ shape: procs, label: "+++acc,spd,<br>+++crit<br>--stress<br><i>FINALE:</i>"}
             Jester_debuff@{ shape: procs, label: " "}
             hero_Jester ---> Jester_buff & Jester_debuff
         
-            class hero_Jester nodeHeroTitle;
+            class hero_Jester nodeHeroTeam;
             class Jester_buff nodeBuff;
             class Jester_debuff nodeDebuff;
         end
