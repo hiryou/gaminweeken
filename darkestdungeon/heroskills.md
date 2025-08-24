@@ -352,6 +352,7 @@ graph TB
         
         riposte --- sgraph_ManatArms
         guard _guard_2@---|self_+prot| sgraph_ManatArms
+        %% sgraph_ManatArms _mark_5@o-.-o|passive| mark
         sgraph_ManatArms _stun_8@o--o|#8680;1| stun
         sgraph_ManatArms _shuffle_3@o--o shuffle
         
