@@ -23,6 +23,7 @@ graph TB
     classDef nodeHeroTeam stroke:#151517,fill:#8817ad,stroke-width:2px;
     classDef nodeHeroPlain stroke:#151517,fill:grey,stroke-width:1px;
     classDef nodeHeroArmorPierce stroke:#ba583a,fill:#ba583a;
+    classDef nodeHeroFinale stroke:#151517,fill:#b03c3c,stroke-width:2px;
     
     %% Endure side
     
@@ -58,8 +59,6 @@ graph TB
         
         subgraph _sgraph_endure_enemy_[enemy]
             endure_stat_enemy_dmg@{ shape: delay, label: "<b>DMG</b>" }
-            endure_stat_enemy_na1[ ]
-            endure_stat_enemy_na2[ ]
             endure_stat_enemy_acc@{ shape: delay, label: "<b>ACC/CRIT</b>" }
             
             class endure_stat_enemy_dmg node_EndureEnemy_dmg;
@@ -79,7 +78,7 @@ graph TB
         direction LR 
         
         _Arbalest([Arbalest/<br>Musketeer])
-        _ManatArms@{ shape: docs, label: "Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
+        _ManatArms@{ shape: docs, label: "#128737;#65039;#128257;<br>Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
         _Leper([Leper<br>#9876;#9876;#9876; #8982;])
         _Abomination([Abomination<br>#9876;#9876; #8982;#8982;])
         _Doctor(PlagueDoctor<br>#9876; #8982;#8982;#8982;)
@@ -93,13 +92,15 @@ graph TB
         %% _Shieldbreaker([#9022; <br>Shieldbreaker<br>#9876;#9876; #8982;#8982;])
         _Hellion([Hellion<br>#9876;#9876;#9876;#9876;])
         _Jester@{ shape: docs, label: "__Jester__<br>#9876;#9876;#9876; #8982;"}
-        _Hwyman([Highwayman<br>#9876;#9876; #8982;#8982;])
+        _Hwyman([#128737;#65039;#128257;<br>Highwayman<br>#9876;#9876; #8982;#8982;])
+        
+        _Shieldbreaker([Shieldbreaker<br>#9876;#9876; #8982;#8982;])
         
         %% css styling hero nodes %%
         class _ManatArms nodeHeroTeam;
         class _HoundMaster nodeHeroTeam;
         class _Antiquarian nodeHeroTeam;
-        class _Jester nodeHeroTeam;
+        class _Jester nodeHeroFinale;
         class _Arbalest nodeHeal;
         class _Vestal nodeHeal;
         class _Doctor nodeHeal;
@@ -112,8 +113,9 @@ graph TB
         class _GraveRobber nodeHeroPlain
         %% class _Shieldbreaker nodeHeroArmorPierce
         class _Hellion nodeHeroArmorPierce
+        class _Shieldbreaker nodeHeroArmorPierce
         
-        _Crusader & _Antiquarian & _Doctor ~~~ _GraveRobber & _ManatArms & _Leper & _Arbalest & _HoundMaster & _Occultist ~~~ _Hellion & _Hwyman & _Jester & _Abomination & _BountyHunter & _Vestal   
+        _Crusader & _Antiquarian ~~~ _GraveRobber & _ManatArms & _Leper & _Arbalest & _Jester & _HoundMaster & _Occultist ~~~ _Hwyman & _Shieldbreaker & _Hellion & _Doctor & _Abomination & _Vestal & _BountyHunter   
         
         %% prettify
         
@@ -190,18 +192,21 @@ graph TB
     class _Abomination_e2 edge_AssaultEnemy_dodge;
     
     %% Endure stats
-    endure_stat_enemy_dmg _Doctor_e1@o--o _Doctor
+    %% endure_stat_enemy_dmg _Doctor_e1@o--o _Doctor
+    _Doctor _Doctor_e1@o--o assault_stat_team_dmg 
     %% Assault stats
     %% styling
-    class _Doctor_e1 edge_EndureEnemy_dmg;
+    class _Doctor_e1 edge_AssaultTeam_dmg;
     
     %% Endure stats
     endure_stat_enemy_dmg _Occultist_e1@o--o _Occultist
     %% Assault stats
     _Occultist _Occultist_e2@o--o assault_stat_enemy_prot
+    _Occultist _Occultist_e3@o--o assault_stat_enemy_dodge
     %% styling
     class _Occultist_e2 edge_AssaultEnemy_prot
     class _Occultist_e1 edge_EndureEnemy_dmg;
+    class _Occultist_e3 edge_AssaultEnemy_dodge
     
     %% Endure stats
     %% Assault stats
@@ -244,8 +249,12 @@ graph TB
     %% Endure stats
     %% Assault stats
     _Vestal _Vestal_e1@o--o assault_stat_enemy_dodge
+    _Vestal _Vestal_e2@o-.-o assault_stat_team_acc
+    _Vestal _Vestal_e3@o-.-o assault_stat_team_dmg
     %% styling
     class _Vestal_e1 edge_AssaultEnemy_dodge;
+    class _Vestal_e2 edge_AssaultTeam_acc;
+    class _Vestal_e3 edge_AssaultTeam_dmg;
     
     %% Endure stats
     endure_stat_team_prot _Crusader_e1@o-.-o _Crusader
@@ -266,21 +275,26 @@ graph TB
     class _Hellion_e2 edge_AssaultTeam_dmg;
     
     %% Endure stats
+    endure_stat_team_dodge _Jester_e0@o-.-o _Jester
     %% Assault stats
-    _Jester _Jester_e1@o--o assault_stat_team_acc
+    _Jester _Jester_e1@o-.-o assault_stat_team_acc
+    _Jester _Jester_e2@o-.-o assault_stat_team_dmg
     %% styling
-    _Jester_e1@{ animation: slow }
+    %% _Jester_e1@{ animation: slow }
+    class _Jester_e0 edge_EndureTeam_dodge;
     class _Jester_e1 edge_AssaultTeam_acc;
+    class _Jester_e2 edge_AssaultTeam_dmg;
+    _Jester_e1@{ animation: slow }
     
     %% Endure stats
-    endure_stat_enemy_dmg _Hwyman_e1@o-.-o _Hwyman
+    %% endure_stat_enemy_dmg _Hwyman_e1@o-.-o _Hwyman
     %% Assault stats
-    _Hwyman _Hwyman_e2@o-.-o assault_stat_team_acc
+    _Hwyman _Hwyman_e2@o---o assault_stat_team_acc
     _Hwyman _Hwyman_e3@o-.-o assault_stat_team_dmg
     %% styling
     class _Hwyman_e2 edge_AssaultTeam_acc;
     class _Hwyman_e3 edge_AssaultTeam_dmg;
-    class _Hwyman_e1 edge_EndureEnemy_dmg;    
+    _Hwyman_e2@{ animation: slow }    
         
         
 ```
