@@ -113,7 +113,7 @@ graph TB
         %% class _Shieldbreaker nodeHeroArmorPierce
         class _Hellion nodeHeroArmorPierce
         
-        _Crusader & _GraveRobber & _Antiquarian & _Doctor ~~~ _ManatArms & _Leper & _Arbalest & _HoundMaster & _Occultist ~~~ _Hellion & _Hwyman & _Jester & _Abomination & _BountyHunter & _Vestal   
+        _Crusader & _Antiquarian & _Doctor ~~~ _GraveRobber & _ManatArms & _Leper & _Arbalest & _HoundMaster & _Occultist ~~~ _Hellion & _Hwyman & _Jester & _Abomination & _BountyHunter & _Vestal   
         
         %% prettify
         
@@ -145,7 +145,7 @@ graph TB
     %% Endure stats
     endure_stat_team_prot _ManatArms_e0@o--o _ManatArms
     endure_stat_team_dodge _ManatArms_e1@o--o _ManatArms
-    endure_stat_enemy_dmg _ManatArms_e2@o--o _ManatArms
+    %% endure_stat_enemy_dmg _ManatArms_e2@o--o _ManatArms
     %% Assault stats
     _ManatArms _ManatArms_e3@o--o assault_stat_team_acc
     _ManatArms _ManatArms_e4@o--o assault_stat_team_dmg
@@ -213,9 +213,13 @@ graph TB
     
     %% Endure stats
     endure_stat_team_dodge _GraveRobber_e1@o-.-o _GraveRobber
+    _GraveRobber _GraveRobber_e2@o-.-o assault_stat_team_acc 
+    _GraveRobber _GraveRobber_e3@o-.-o assault_stat_team_dmg 
     %% Assault stats
     %% styling
     class _GraveRobber_e1 edge_EndureTeam_dodge;
+    class _GraveRobber_e2 edge_AssaultTeam_acc;
+    class _GraveRobber_e3 edge_AssaultTeam_dmg;
     
     _HoundMaster
     %% Endure stats
