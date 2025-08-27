@@ -77,23 +77,23 @@ graph TB
     subgraph _heroes_[ ]
         direction LR 
         
-        _Arbalest([<span class="med_icons">#127939;</span><br>Arbalest/<br>Musketeer])
-        _ManatArms@{ shape: docs, label: "<span class="med_icons">#128737;#65039; #127939;#127939;</span><span class="big_icons">#128519;</span><br>Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
+        _Arbalest([<span class="med_icons">#127939;</span><span class="big_icons">#128065;</span><br>Arbalest/<br>Musketeer])
+        _ManatArms@{ shape: docs, label: "<span class="big_icons">#9960;</span><span class="med_icons">#128737;#65039; #127939;#127939;</span><span class="big_icons">#128519;</span><br>Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
         _Leper([<span class="med_icons">#127939;</span><span class="big_icons">#9787;</span><br>Leper<br>#9876;#9876;#9876; #8982;])
         _Abomination([<span class="med_icons">#127939;</span><span class="big_icons">#9787;</span><br>Abomination<br>#9876;#9876; #8982;#8982;])
         _Doctor(<span class="med_icons">#127939;</span><br>PlagueDoctor<br>#9876; #8982;#8982;#8982;)
         _Occultist(Occultist<br>#9876; #8982;#8982;#8982;)
         _BountyHunter([<span class="med_icons">#127939;</span><br>BountyHunter<br>#9876;#9876; #8982;#8982;])
         _GraveRobber([<span class="med_icons">#128123;</span><br>GraveRobber<br>#9876;#9876; #8982;#8982;])
-        _HoundMaster@{ shape: docs, label: "<span class="big_icons">#128519;</span><br>HoundMaster<br>#9876; #8982;#8982;#8982;"}
+        _HoundMaster@{ shape: docs, label: "<span class="big_icons">#9960; #128519;</span><br>HoundMaster<br>#9876; #8982;#8982;#8982;"}
         _Antiquarian@{ shape: docs, label: "Antiquarian<br>#9876; #8982;#8982;"}
-        _Vestal(Vestal<br>#9876; #8982;#8982;#8982;)
+        _Vestal(<span class="big_icons">#128065;</span><br>Vestal<br>#9876; #8982;#8982;#8982;)
         _Crusader(<span class="big_icons">#128578;</span><br>Crusader<br>#9876;#9876;#9876; #8982;)
         _Hellion([Hellion<br>#9876;#9876;#9876;#9876;])
         _Jester@{ shape: docs, label: "<span class="med_icons">#127939;#127939;</span><span class="big_icons">#128519;</span><br>__Jester__<br>#9876;#9876;#9876; #8982;"}
-        _Hwyman([<span class="med_icons">#128737;#65039;</span><br>Highwayman<br>#9876;#9876; #8982;#8982;])
+        _Hwyman([<span class="med_icons">#128737;#65039;</span><span class="big_icons">#128065;</span><br>Highwayman<br>#9876;#9876; #8982;#8982;])
         
-        _Shieldbreaker([<span class="med_icons">#127939;</span><br>Shieldbreaker<br>#9876;#9876; #8982;#8982;])
+        _Shieldbreaker([<span class="med_icons">#127939;</span><span class="big_icons">#128065;</span><br>Shieldbreaker<br>#9876;#9876; #8982;#8982;])
         
         %% css styling hero nodes %%
         class _ManatArms nodeHeroTeam;
@@ -152,9 +152,9 @@ graph TB
     _ManatArms _ManatArms_e4@o--o assault_stat_team_dmg
     _ManatArms _ManatArms_e5@o--o assault_stat_enemy_dodge
     %% styling
-    _ManatArms_e1@{ animation: slow }
-    _ManatArms_e3@{ animation: slow }
-    _ManatArms_e5@{ animation: slow }
+    _ManatArms_e1@{ animation: fast }
+    _ManatArms_e3@{ animation: fast }
+    _ManatArms_e5@{ animation: fast }
     class _ManatArms_e3 edge_AssaultTeam_acc;
     class _ManatArms_e4 edge_AssaultTeam_dmg;
     class _ManatArms_e5 edge_AssaultEnemy_dodge;
@@ -240,7 +240,7 @@ graph TB
     endure_stat_enemy_acc _Antiquarian_e3@o--o _Antiquarian
     %% Assault stats
     %% styling
-    _Antiquarian_e2@{ animation: slow }
+    _Antiquarian_e2@{ animation: fast }
     class _Antiquarian_e3 edge_EndureEnemy_acc;
     class _Antiquarian_e2 edge_EndureTeam_dodge;
     class _Antiquarian_e1 edge_EndureTeam_prot;
@@ -279,11 +279,11 @@ graph TB
     _Jester _Jester_e1@o-.-o assault_stat_team_acc
     _Jester _Jester_e2@o-.-o assault_stat_team_dmg
     %% styling
-    %% _Jester_e1@{ animation: slow }
+    %% _Jester_e1@{ animation: fast }
     class _Jester_e0 edge_EndureTeam_dodge;
     class _Jester_e1 edge_AssaultTeam_acc;
     class _Jester_e2 edge_AssaultTeam_dmg;
-    _Jester_e1@{ animation: slow }
+    _Jester_e1@{ animation: fast }
     
     %% Endure stats
     %% endure_stat_enemy_dmg _Hwyman_e1@o-.-o _Hwyman
@@ -293,7 +293,7 @@ graph TB
     %% styling
     class _Hwyman_e2 edge_AssaultTeam_acc;
     class _Hwyman_e3 edge_AssaultTeam_dmg;
-    _Hwyman_e2@{ animation: slow }    
+    _Hwyman_e2@{ animation: fast }    
         
         
 ```

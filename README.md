@@ -39,6 +39,12 @@ Once done, generate the diagram
     Found 1 mermaid charts in Markdown input
       ✅ ./heroskills-1.svg
     ```
+  for offense-defense graph
+    ```shell
+    $ mmdc -i offdef.md -e svg -b grey -o offdef.svg
+    Found 1 mermaid charts in Markdown input
+      ✅ ./offdef-1.svg
+    ```
 
 * To output png file
     ```shell

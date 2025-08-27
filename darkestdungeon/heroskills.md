@@ -71,12 +71,12 @@ graph TB
         direction LR
         
         %% declare common actions here
-        guard[guard]
+        %% guard[guard]
         cure[cure:<br>blight,bled]
         riposte[riposte]
         
         %% css styling skill nodes %%
-        class guard nodeGuard;
+        %% class guard nodeGuard;
         class riposte nodeSkillPlain;
         class heal nodeHeal;
         class cure nodeCure;
@@ -354,7 +354,7 @@ graph TB
         %% stealth ---|self_<br>+++dmg,<br>+crit,dod| sgraph_GraveRobber
         sgraph_GraveRobber _blight_3@o--o blight
         
-        guard _guard_1@--- sgraph_HoundMaster
+        %% guard _guard_1@--- sgraph_HoundMaster
         sgraph_HoundMaster _bleed_4@o--o bleed
         sgraph_HoundMaster _mark_3@o--o mark
         sgraph_HoundMaster _stun_5@o--o stun
@@ -371,7 +371,7 @@ graph TB
         sgraph_Crusader _stun_7@o--o stun
         
         riposte --- sgraph_ManatArms
-        guard _guard_2@---|self_+prot| sgraph_ManatArms
+        %% guard _guard_2@---|self_+prot| sgraph_ManatArms
         %% sgraph_ManatArms _mark_6@o-.-o|passive| mark
         sgraph_ManatArms _stun_8@o--o|#8680;1| stun
         sgraph_ManatArms _shuffle_3@o--o shuffle
