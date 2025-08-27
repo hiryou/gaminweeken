@@ -79,8 +79,8 @@ graph TB
         
         _Arbalest([Arbalest/<br>Musketeer])
         _ManatArms@{ shape: docs, label: "<span class="med_icons">#128737;#65039;</span><span class="big_icons">#128519;</span><br>Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
-        _Leper([<span class="big_icons">#9786;</span><br>Leper<br>#9876;#9876;#9876; #8982;])
-        _Abomination([<span class="big_icons">#9786;</span><br>Abomination<br>#9876;#9876; #8982;#8982;])
+        _Leper([<span class="big_icons">#9787;</span><br>Leper<br>#9876;#9876;#9876; #8982;])
+        _Abomination([<span class="big_icons">#9787;</span><br>Abomination<br>#9876;#9876; #8982;#8982;])
         _Doctor(PlagueDoctor<br>#9876; #8982;#8982;#8982;)
         _Occultist(Occultist<br>#9876; #8982;#8982;#8982;)
         _BountyHunter([BountyHunter<br>#9876;#9876; #8982;#8982;])
