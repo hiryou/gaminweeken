@@ -6,9 +6,9 @@ Darkest dungeon offense & defense tiers:
 %%{ init: {
     'flowchart': {'nodeSpacing': 60, 'rankSpacing': 105, 'curve': 'basis'}, 
     'theme': 'dark', 'themeVariables': { 
-        'fontSize': '14px'
+        'fontSize': '16px'
     },
-    "themeCSS": ".edge-thickness-normal {stroke-width: 4px !important;} .edgeLabel {line-height: 1.0 !important;} span.big_icons {font-size: 30px} span.med_icons {font-size: 20px}"
+    "themeCSS": ".edge-thickness-normal {stroke-width: 4px !important;} .edgeLabel {line-height: 1.0 !important;} span.big_icons {font-size: 30px} span.med_icons {font-size: 24px}"
 } }%%
 
 graph TB
@@ -77,24 +77,23 @@ graph TB
     subgraph _heroes_[ ]
         direction LR 
         
-        _Arbalest([Arbalest/<br>Musketeer])
-        _ManatArms@{ shape: docs, label: "<span class="med_icons">#128737;#65039;</span><span class="big_icons">#128519;</span><br>Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
-        _Leper([<span class="big_icons">#9787;</span><br>Leper<br>#9876;#9876;#9876; #8982;])
-        _Abomination([<span class="big_icons">#9787;</span><br>Abomination<br>#9876;#9876; #8982;#8982;])
-        _Doctor(PlagueDoctor<br>#9876; #8982;#8982;#8982;)
+        _Arbalest([<span class="med_icons">#127939;</span><br>Arbalest/<br>Musketeer])
+        _ManatArms@{ shape: docs, label: "<span class="med_icons">#128737;#65039; #127939;#127939;</span><span class="big_icons">#128519;</span><br>Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
+        _Leper([<span class="med_icons">#127939;</span><span class="big_icons">#9787;</span><br>Leper<br>#9876;#9876;#9876; #8982;])
+        _Abomination([<span class="med_icons">#127939;</span><span class="big_icons">#9787;</span><br>Abomination<br>#9876;#9876; #8982;#8982;])
+        _Doctor(<span class="med_icons">#127939;</span><br>PlagueDoctor<br>#9876; #8982;#8982;#8982;)
         _Occultist(Occultist<br>#9876; #8982;#8982;#8982;)
-        _BountyHunter([BountyHunter<br>#9876;#9876; #8982;#8982;])
-        _GraveRobber([GraveRobber<br>#9876;#9876; #8982;#8982;])
+        _BountyHunter([<span class="med_icons">#127939;</span><br>BountyHunter<br>#9876;#9876; #8982;#8982;])
+        _GraveRobber([<span class="med_icons">#128123;</span><br>GraveRobber<br>#9876;#9876; #8982;#8982;])
         _HoundMaster@{ shape: docs, label: "<span class="big_icons">#128519;</span><br>HoundMaster<br>#9876; #8982;#8982;#8982;"}
         _Antiquarian@{ shape: docs, label: "Antiquarian<br>#9876; #8982;#8982;"}
         _Vestal(Vestal<br>#9876; #8982;#8982;#8982;)
         _Crusader(<span class="big_icons">#128578;</span><br>Crusader<br>#9876;#9876;#9876; #8982;)
-        %% _Shieldbreaker([#9022; <br>Shieldbreaker<br>#9876;#9876; #8982;#8982;])
         _Hellion([Hellion<br>#9876;#9876;#9876;#9876;])
-        _Jester@{ shape: docs, label: "<span class="big_icons">#128519;</span><br>__Jester__<br>#9876;#9876;#9876; #8982;"}
+        _Jester@{ shape: docs, label: "<span class="med_icons">#127939;#127939;</span><span class="big_icons">#128519;</span><br>__Jester__<br>#9876;#9876;#9876; #8982;"}
         _Hwyman([<span class="med_icons">#128737;#65039;</span><br>Highwayman<br>#9876;#9876; #8982;#8982;])
         
-        _Shieldbreaker([Shieldbreaker<br>#9876;#9876; #8982;#8982;])
+        _Shieldbreaker([<span class="med_icons">#127939;</span><br>Shieldbreaker<br>#9876;#9876; #8982;#8982;])
         
         %% css styling hero nodes %%
         class _ManatArms nodeHeroTeam;
