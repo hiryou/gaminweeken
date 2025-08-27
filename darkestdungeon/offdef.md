@@ -8,7 +8,7 @@ Darkest dungeon offense & defense tiers:
     'theme': 'dark', 'themeVariables': { 
         'fontSize': '14px'
     },
-    "themeCSS": ".edge-thickness-normal {stroke-width: 4px !important;} .edgeLabel {line-height: 1.0 !important;}"
+    "themeCSS": ".edge-thickness-normal {stroke-width: 4px !important;} .edgeLabel {line-height: 1.0 !important;} span.big_icons {font-size: 30px} span.med_icons {font-size: 20px}"
 } }%%
 
 graph TB
@@ -78,21 +78,21 @@ graph TB
         direction LR 
         
         _Arbalest([Arbalest/<br>Musketeer])
-        _ManatArms@{ shape: docs, label: "#128737;#65039;#128257;<br>Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
-        _Leper([Leper<br>#9876;#9876;#9876; #8982;])
-        _Abomination([Abomination<br>#9876;#9876; #8982;#8982;])
+        _ManatArms@{ shape: docs, label: "<span class="med_icons">#128737;#65039;</span><span class="big_icons">#128519;</span><br>Man-at-Arms<br>#9876;#9876;#9876; #8982;"}
+        _Leper([<span class="big_icons">#9786;</span><br>Leper<br>#9876;#9876;#9876; #8982;])
+        _Abomination([<span class="big_icons">#9786;</span><br>Abomination<br>#9876;#9876; #8982;#8982;])
         _Doctor(PlagueDoctor<br>#9876; #8982;#8982;#8982;)
         _Occultist(Occultist<br>#9876; #8982;#8982;#8982;)
         _BountyHunter([BountyHunter<br>#9876;#9876; #8982;#8982;])
         _GraveRobber([GraveRobber<br>#9876;#9876; #8982;#8982;])
-        _HoundMaster@{ shape: docs, label: "HoundMaster<br>#9876; #8982;#8982;#8982;"}
+        _HoundMaster@{ shape: docs, label: "<span class="big_icons">#128519;</span><br>HoundMaster<br>#9876; #8982;#8982;#8982;"}
         _Antiquarian@{ shape: docs, label: "Antiquarian<br>#9876; #8982;#8982;"}
         _Vestal(Vestal<br>#9876; #8982;#8982;#8982;)
-        _Crusader(Crusader<br>#9876;#9876;#9876; #8982;)
+        _Crusader(<span class="big_icons">#128578;</span><br>Crusader<br>#9876;#9876;#9876; #8982;)
         %% _Shieldbreaker([#9022; <br>Shieldbreaker<br>#9876;#9876; #8982;#8982;])
         _Hellion([Hellion<br>#9876;#9876;#9876;#9876;])
-        _Jester@{ shape: docs, label: "__Jester__<br>#9876;#9876;#9876; #8982;"}
-        _Hwyman([#128737;#65039;#128257;<br>Highwayman<br>#9876;#9876; #8982;#8982;])
+        _Jester@{ shape: docs, label: "<span class="big_icons">#128519;</span><br>__Jester__<br>#9876;#9876;#9876; #8982;"}
+        _Hwyman([<span class="med_icons">#128737;#65039;</span><br>Highwayman<br>#9876;#9876; #8982;#8982;])
         
         _Shieldbreaker([Shieldbreaker<br>#9876;#9876; #8982;#8982;])
         
