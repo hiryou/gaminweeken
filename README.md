@@ -56,5 +56,11 @@ Once done, generate the diagram
 
 Open the generated `heroskills-1.svg` in Google Chrome. It should look like this:
 
-![Darkest Heroes](./darkestdungeon/img/heroskills-1.png "Darkest Heroes")
+![Darkest Heroes](./darkestdungeon/img/heroskills-1.png "Heroes & Skills")
+
+A more crucial element of this game is the system of buff-team & debuff-enemy which classifies your strategies 
+in to a ratio of offense/defense play. The diagram for this is 
+`offdef-1.svg`, should look like this in Google Chrome:
+
+![Darkest Heroes](./darkestdungeon/img/offdef-1.png "Offense/Defense")
 
