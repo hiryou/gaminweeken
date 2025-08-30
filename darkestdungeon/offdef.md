@@ -16,6 +16,7 @@ graph TB
     classDef default stroke:#151517,fill:none;
     
     classDef nodeHeal stroke:#2c3291,fill:#2c3291;
+    classDef nodeHealTeam stroke:#151517,fill:#2c3291,stroke-width:2px;
     classDef nodeHealSml stroke:#fff,stroke-width:14px,fill:#2c3291,stroke-dasharray: 1 10;
     
     classDef nodeHealSelf stroke:#5343e8,fill:#5343e8;
@@ -87,7 +88,8 @@ graph TB
         _GraveRobber([<span class="med_icons">#128123;</span><br>GraveRobber<br>#9876;#9876; #8982;#8982;])
         _HoundMaster@{ shape: docs, label: "<span class="big_icons">#9960; #128519;</span><br>HoundMaster<br>#9876; #8982;#8982;#8982;"}
         _Antiquarian@{ shape: docs, label: "Antiquarian<br>#9876; #8982;#8982;"}
-        _Vestal(<span class="big_icons">#128065;</span><br>Vestal<br>#9876; #8982;#8982;#8982;)
+        %% _Vestal(<span class="big_icons">#128065;</span><br>Vestal<br>#9876; #8982;#8982;#8982;)
+        _Vestal@{ shape: docs, label: "<span class="big_icons">#128065;</span><br>Vestal<br>#9876; #8982;#8982;#8982;"}
         _Crusader(<span class="big_icons">#128578;</span><br>Crusader<br>#9876;#9876;#9876; #8982;)
         _Hellion([Hellion<br>#9876;#9876;#9876;#9876;])
         _Jester@{ shape: docs, label: "<span class="med_icons">#127939;#127939;</span><span class="big_icons">#128519;</span><br>__Jester__<br>#9876;#9876;#9876; #8982;"}
@@ -101,7 +103,7 @@ graph TB
         class _Antiquarian nodeHeroTeam;
         class _Jester nodeHeroFinale;
         class _Arbalest nodeHeal;
-        class _Vestal nodeHeal;
+        class _Vestal nodeHealTeam;
         class _Doctor nodeHeal;
         class _Occultist nodeHeal;
         class _Crusader nodeHeal;
@@ -109,7 +111,7 @@ graph TB
         class _Hwyman nodeHeroPlain
         class _Abomination nodeHealSelf
         class _BountyHunter nodeHeroPlain
-        class _GraveRobber nodeHeroPlain
+        class _GraveRobber nodeHeroArmorPierce
         %% class _Shieldbreaker nodeHeroArmorPierce
         class _Hellion nodeHeroArmorPierce
         class _Shieldbreaker nodeHeroArmorPierce
