@@ -4,3 +4,19 @@ batodropin/build/
 batodropin/out/
 
 
+# Ignore local executable installers
+RetroGames/installers/
+*.apk
+
+# Ignore game data files and personal ROM collections
+RetroGames/roms/
+RetroGames/bios/
+
+# Ignore processed imagery assets
+RetroGames/media_staging/
+ES-DE/
+
+# Ignore Python runtime cache footprints
+__pycache__/
+*.pyc
+
