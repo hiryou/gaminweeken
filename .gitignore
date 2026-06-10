@@ -6,7 +6,9 @@ batodropin/out/
 
 # Ignore local executable installers
 RetroGames/installers/
-*.apk
+# newly downloaded apks
+retrodroid/artifacts/apks/*.apk
+retrodroid/artifacts/download/*.apk
 
 # Ignore game data files and personal ROM collections
 RetroGames/roms/
@@ -14,9 +16,11 @@ RetroGames/bios/
 
 # Ignore processed imagery assets
 RetroGames/media_staging/
-ES-DE/
+#ES-DE/
 
 # Ignore Python runtime cache footprints
 __pycache__/
 *.pyc
+
+
 

@@ -15,6 +15,7 @@ How to use this script in your Terminal pipeline
 """
 
 import os
+import shutil
 import subprocess
 import socket
 
@@ -32,7 +33,14 @@ def get_local_ip():
         s.close()
         return local_ip
     except Exception:
-        return "127.0.0.1 (Offline or interface issue)"
+        return None
+
+def get_termux_username():
+    """Returns the current Termux username for SSH examples."""
+    try:
+        return subprocess.check_output(["whoami"], text=True).strip()
+    except Exception:
+        return "termux_username"
 
 def setup_directory_tree():
     """Generates the absolute structure required for ROM storage and image staging."""
@@ -75,18 +83,26 @@ def setup_termux_ssh_autostart():
         # Write the persistent absolute script command to wake sshd on start
         with open(autostart_script_path, "w") as f:
             f.write("#!/data/data/com.termux/files/usr/bin/sh\n")
+            if shutil.which("termux-wake-lock"):
+                f.write("termux-wake-lock\n")
             f.write("sshd\n")
 
         # Adjust execution permission mapping settings
         os.chmod(autostart_script_path, 0o755)
         print(f"    [+] Persistent daemon target initialized at: {autostart_script_path}")
+        print("    [!] Termux:Boot must be installed and opened once for this script to run on reboot.")
 
         # Test spin the live process immediately to verify configuration stability
         print("[*] Running initial terminal system daemon configuration sweep...")
-        subprocess.run(["sshd"], check=False)
-        print("    [+] Background service instance spawned successfully.")
+        sshd_proc = subprocess.run(["sshd"], capture_output=True, text=True, check=False)
+        if sshd_proc.returncode == 0:
+            print("    [+] Background service instance spawned successfully.")
+            return True
+        print(f"    [-] sshd launch failed: {sshd_proc.stderr.strip() or sshd_proc.stdout.strip() or 'unknown error'}")
+        return False
     except Exception as e:
         print(f"    [-] Critical script permission interruption: {e}")
+        return False
 
 def main():
     print("=========================================================")
@@ -94,20 +110,25 @@ def main():
     print("=========================================================\n")
 
     setup_directory_tree()
-    setup_termux_ssh_autostart()
+    # Boot-time sshd setup is intentionally left as a manual step because
+    # Termux:Boot must be installed and opened once before Android will allow
+    # its boot scripts to run.
+    # ssh_autostart_ready = setup_termux_ssh_autostart()
 
     current_ip = get_local_ip()
+    username = get_termux_username()
     print("\n" + "="*57)
     print("🎉 SYSTEM INITIALIZATION PARSE PHASE COMPLETE!")
     print("="*57)
     print(f"🏡 MicroSD Folder Backbone: {RETROGAMES_ROOT}/")
-    print(f"🔒 SSH Daemon Autostart Status: ACTIVE")
-    print(f"🌐 Remote Connection Terminal Command Line to copy and run:")
-    print(f"    ssh -p 8022 userspace@{current_ip}")
+    print("🔒 SSH Daemon Autostart Status: MANUAL STEP REQUIRED")
+    print("   Install Termux:Boot, open it once, then create ~/.termux/boot/start-sshd manually.")
+    if current_ip:
+        print("🌐 Remote Connection Terminal Command Line to copy and run:")
+        print(f"    ssh -p 8022 {username}@{current_ip}")
+    else:
+        print("🌐 Remote Connection Terminal Command Line: unavailable until the device has a network IP.")
     print("="*57 + "\n")
 
 if __name__ == "__main__":
     main()
-
-
-

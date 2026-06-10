@@ -1,0 +1,7 @@
+{
+  "emulator": "retroarch",
+  "filename": "RetroArch_aarch64.apk",
+  "source_url": "https://buildbot.libretro.com/stable/1.22.2/android/RetroArch_aarch64.apk",
+  "sha256": "7bd5d208dfe93cc8e2ea6c04608948ce1a045980f160a58ca2d0993aa20ad213",
+  "size": 183956821
+}

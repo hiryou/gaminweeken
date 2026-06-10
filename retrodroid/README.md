@@ -64,7 +64,8 @@ isolated SSH daemon:
 2. Expose the shell and initialize the ecosystem over the network by executing:
    ```bash
    pkg update && pkg upgrade -y
-   pkg install openssh -y
+   pkg install openssh python iproute2 -y
+   # considered: termux-services
    passwd
    sshd
    ```
@@ -73,8 +74,9 @@ isolated SSH daemon:
    ```bash
    ssh -p 8022 <orange_pi_ip_address>
    ```
-4. *Automation Note:* Append `sshd` to your boot script configuration at `~/.termux/boot/` to make the daemon persistent
-   on power cycling.
+4. Install the separate **Termux:Boot** Android companion app if you want `sshd` to start automatically after a reboot.
+5. *Automation Note:* Append `sshd` to your boot script configuration at `~/.termux/boot/` to make the daemon persistent
+   on power cycling. This boot script will not run unless **Termux:Boot** has been installed and opened at least once.
 
 ---
 
@@ -115,40 +117,62 @@ media partition:
 
 ## 🚀 Phase 5: Automated Execution Profiles (Python Toolkit Deployment)
 
-This repository contains a modular Python automation toolkit (`initialize_system.py`, `bootstrap_apks.py`, and `sync_art.py`) 
-to handle file structure configuration, emulator installations, and localized artwork synchronization directly via 
-your remote Termux shell.
+This repository contains a modular automation toolkit (`download_apks.sh`, `setup_droid.sh`, plus the supporting
+scripts under `scripts/`) to handle device initialization, host-side APK management, and localized artwork
+synchronization.
 
-### 📋 Prerequisites for Python Execution
-Before executing any script inside your Termux remote terminal session, ensure the core interpreter and network 
-dependencies are fully configured:
+### 📋 Prerequisites
+Before executing the host-side entrypoints, ensure the required Python and transport dependencies are available:
 ```bash
+# on Termux
 pkg update && pkg upgrade -y
 pkg install python -y
-pip install requests
+
+# on host
+python3 -m pip install requests
+```
+
+If you plan to run the host-side orchestration pipeline, also ensure these tools are available on the host:
+```bash
+adb version
+ssh -V
+tar --version
 ```
 
 ### 🎛️ Script Execution Pipeline
 
-Execute the automation tools in the exact logical order detailed below to safely initialize your custom gaming appliance environment:
+Use the two host-side entrypoints below to run the full setup flow.
 
-#### Step 1: Environment Initialization
-Run the system initialization script to build your complete MicroSD card folder backbone and configure the persistent background SSH listener:
+#### Step 1: Optional Host APK Refresh
+Refresh the auto-downloadable emulator APK cache and manifests:
 ```bash
-python initialize_system.py
+./download_apks.sh
 ```
-*   **Resulting Architecture:** Generates all platform folders (`/roms/n64`, `/roms/ps2`, etc.) and forces the `sshd` 
-process to auto-boot whenever the board receives power.
+*   **Resulting Architecture:** Downloads the APKs it can fetch automatically into `artifacts/apks/` on the host,
+alongside the manifest files.
+*   **Pinned Source Exceptions:** A few emulators use predefined direct artifact URLs instead of live release discovery.
+This is currently how **AetherSX2**, **Sudachi**, and **Dolphin** are handled.
+*   **Warning Behavior:** If an emulator's official source is no longer machine-downloadable and no pinned fallback is
+configured, the script prints a noticeable warning summary.
 
-#### Step 2: Binary Emulator Sideloading
-Execute the bootstrap program to parse official APIs, track down the latest working standalone architectures, and 
-scrape down ready-to-use application installers:
+#### Step 2: Required Host Orchestration
+Run the full host orchestrator. This remotely initializes the Droid's directory layout and then installs
+host-tracked APKs over `adb` with idempotency checks:
 ```bash
-python bootstrap_apks.py
+./setup_droid.sh <ssh_target> [adb_serial]
 ```
-*   **Resulting Architecture:** Downloads all target APK files (including RetroArch, M64Plus FZ, NetherSX2, Citra, and Dolphin) 
-cleanly into your local storage cache at `/RetroGames/installers/`. Navigate to this folder inside Android using a 
-file manager to execute them natively.
+*   **Nested Device Step:** Streams `scripts/` to the Droid, then runs the remote setup helper to create the
+device-side folder layout under `/storage/emulated/0/RetroGames` and `/sdcard/Download/retrodroid`.
+*   **Nested Host Install Step:** Validates every tracked manifest and APK payload pair, then installs only the
+emulators that are not already present on the device.
+
+#### Tracked APK Metadata
+Track installable APKs by storing JSON manifest files under:
+```text
+artifacts/apks/
+```
+*   **Manifest Fields:** Each manifest stores the target APK filename, source URL, size, and `sha256`.
+*   **Payload Storage Rule:** The actual APK payloads live in `artifacts/apks/` beside the manifests.
 
 #### Step 3: Game & Media Content Ingestion
 1. Move your verified system ROM files into their respective subfolders inside `/RetroGames/roms/`.
@@ -167,4 +191,3 @@ by **ES-DE** (`/ES-DE/downloaded_media/`).
 
 
 ---
-
