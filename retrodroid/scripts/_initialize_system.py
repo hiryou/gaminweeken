@@ -18,10 +18,13 @@ import os
 import shutil
 import subprocess
 import socket
+from pathlib import Path
 
 # CONFIGURATION ARCHITECTURE
 RETROGAMES_ROOT = "/storage/emulated/0/RetroGames"
 PLATFORMS = ["nes", "snes", "genesis", "dreamcast", "ps1", "gc", "3ds", "ps2", "n64"]
+RETRODROID_SHELL_ROOT = Path.home() / ".config" / "retrodroid" / "shell"
+WATCH_CPU_HELPER = "watch_cpu.bash"
 
 def get_local_ip():
     """Fetches the active local network IP address of the Orange Pi 5 board."""
@@ -66,6 +69,64 @@ def setup_directory_tree():
         platform_path = os.path.join(RETROGAMES_ROOT, "roms", platform)
         os.makedirs(platform_path, exist_ok=True)
         print(f"    [+] Created platform target entry: .../roms/{platform}/")
+
+
+def _ensure_bash_profile_sources_bashrc(bash_profile_path: Path) -> None:
+    source_line = '[ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"'
+    managed_block = (
+        "# >>> retrodroid bashrc bootstrap >>>\n"
+        f"{source_line}\n"
+        "# <<< retrodroid bashrc bootstrap <<<\n"
+    )
+
+    if bash_profile_path.exists():
+        content = bash_profile_path.read_text()
+        if source_line in content:
+            return
+        new_content = content.rstrip("\n") + "\n\n" + managed_block
+    else:
+        new_content = managed_block
+
+    bash_profile_path.write_text(new_content)
+
+
+def _ensure_bashrc_sources_helper(bashrc_path: Path, helper_path: Path) -> None:
+    source_line = f'[ -f "{helper_path}" ] && . "{helper_path}"'
+    managed_block = (
+        "# >>> retrodroid shell helpers >>>\n"
+        f"{source_line}\n"
+        "# <<< retrodroid shell helpers <<<\n"
+    )
+
+    if bashrc_path.exists():
+        content = bashrc_path.read_text()
+        if source_line in content:
+            return
+        new_content = content.rstrip("\n") + "\n\n" + managed_block
+    else:
+        new_content = managed_block
+
+    bashrc_path.write_text(new_content)
+
+
+def install_termux_shell_helpers(artifacts_dir: Path) -> None:
+    print("[*] Installing Termux bash helper functions...")
+
+    source_helper = artifacts_dir / WATCH_CPU_HELPER
+    if not source_helper.exists():
+        print(f"    [!] Skipping shell helper install, missing artifact: {source_helper}")
+        return
+
+    RETRODROID_SHELL_ROOT.mkdir(parents=True, exist_ok=True)
+    target_helper = RETRODROID_SHELL_ROOT / WATCH_CPU_HELPER
+    shutil.copyfile(source_helper, target_helper)
+    print(f"    [+] Installed helper artifact: {target_helper}")
+
+    bashrc_path = Path.home() / ".bashrc"
+    bash_profile_path = Path.home() / ".bash_profile"
+    _ensure_bashrc_sources_helper(bashrc_path, target_helper)
+    _ensure_bash_profile_sources_bashrc(bash_profile_path)
+    print("    [+] Bash startup files now load: watch_cpu")
 
 def setup_termux_ssh_autostart():
     """Modifies internal Termux profiles to execute the SSH daemon on power cycles."""

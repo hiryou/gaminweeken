@@ -22,5 +22,6 @@ RetroGames/media_staging/
 __pycache__/
 *.pyc
 
-
+tmp/
+.venv*
 

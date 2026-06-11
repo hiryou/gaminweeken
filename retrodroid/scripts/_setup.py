@@ -11,6 +11,7 @@ import _initialize_system
 
 
 WORKDIR = Path("/sdcard/Download/retrodroid")
+TERMUX_ARTIFACTS_DIR = WORKDIR / "artifacts" / "termux"
 
 
 def main() -> int:
@@ -18,10 +19,12 @@ def main() -> int:
 
     print("[*] Initializing RetroDroid folder structure...")
     _initialize_system.setup_directory_tree()
+    _initialize_system.install_termux_shell_helpers(TERMUX_ARTIFACTS_DIR)
 
     print("\n============================= SUMMARY =============================")
     print("[+] Device-side setup complete.")
     print(f"[+] Working directory ensured: {WORKDIR}")
+    print("[+] Termux bash helper installed: watch_cpu")
     print("[*] APK download and installation are now host-side tasks.")
     return 0
 

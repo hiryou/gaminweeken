@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 REMOTE_WORKDIR="/sdcard/Download/retrodroid"
+REMOTE_ESDE_CUSTOM_SYSTEMS="/sdcard/ES-DE/custom_systems"
 DRYRUN=0
 
 usage() {
@@ -22,6 +23,37 @@ require_cmd() {
         echo "Missing required command: $1" >&2
         exit 1
     fi
+}
+
+sync_esde_custom_systems() {
+    if [ ! -d artifacts/custom_systems ]; then
+        return
+    fi
+
+    local xml_count
+    xml_count=$(find artifacts/custom_systems -maxdepth 1 -type f -name '*.xml' | wc -l | tr -d ' ')
+    if [ "$xml_count" = "0" ]; then
+        return
+    fi
+
+    # artifacts/custom_systems/* was last sourced from
+    # https://github.com/GlazedBelmont/es-de-android-custom-systems/releases/download/v1.50/es_find_rules.xml
+    # https://github.com/GlazedBelmont/es-de-android-custom-systems/releases/download/v1.50/es_systems.xml
+
+    echo
+    echo "[*] Syncing ES-DE custom system XMLs via adb..."
+    adb shell "mkdir -p '$REMOTE_ESDE_CUSTOM_SYSTEMS'"
+    adb push artifacts/custom_systems/. "$REMOTE_ESDE_CUSTOM_SYSTEMS/" >/dev/null
+}
+
+build_remote_payload_args() {
+    local payload=("scripts")
+
+    if [ -d artifacts/termux ]; then
+        payload+=("artifacts/termux")
+    fi
+
+    printf '%s\n' "${payload[@]}"
 }
 
 resolve_adb_serial() {
@@ -107,8 +139,17 @@ echo "[*] ADB serial: $ADB_SERIAL"
 if [ "$DRYRUN" -eq 0 ]; then
     echo
     echo "[*] Streaming scripts/ to the device and running remote setup..."
-    tar czf - scripts | ssh -p 8022 "$SSH_TARGET" \
+    REMOTE_PAYLOAD=()
+    while IFS= read -r payload_path; do
+        REMOTE_PAYLOAD+=("$payload_path")
+    done < <(build_remote_payload_args)
+    tar czf - "${REMOTE_PAYLOAD[@]}" | ssh -p 8022 "$SSH_TARGET" \
         "mkdir -p '$REMOTE_WORKDIR' && tar xzf - -C '$REMOTE_WORKDIR' && bash '$REMOTE_WORKDIR/scripts/setup.sh'"
+
+    sync_esde_custom_systems
+elif [ -d artifacts/custom_systems ] && find artifacts/custom_systems -maxdepth 1 -type f -name '*.xml' | grep -q .; then
+    echo
+    echo "[*] Dry run mode enabled. ES-DE custom system XML sync will be skipped."
 fi
 
 echo

@@ -15,6 +15,12 @@ from pathlib import Path
 
 DEFAULT_MANIFEST_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "apks"
 DEFAULT_DOWNLOAD_DIR = DEFAULT_MANIFEST_DIR
+OPTIONAL_LOCAL_APK_RULES = [
+    {
+        "match_prefixes": ("ES-DE", "ES_DE", "es-de", "es_de", "EmulationStation"),
+        "emulator": "esde",
+    },
+]
 APK_INSTALL_RULES = [
     {
         "match_prefixes": ("RetroArch",),
@@ -71,6 +77,11 @@ APK_INSTALL_RULES = [
         "emulator": "dolphin",
         "grep_tokens": ("dolphin",),
     },
+    {
+        "match_prefixes": ("ES-DE", "ES_DE", "es-de", "es_de", "EmulationStation"),
+        "emulator": "esde",
+        "grep_tokens": ("emulationstation", "es_de", "es-de"),
+    },
 ]
 
 
@@ -86,6 +97,12 @@ class ApkManifest:
     @property
     def download_path(self) -> Path:
         return DEFAULT_DOWNLOAD_DIR / self.filename
+
+
+@dataclass(frozen=True)
+class OptionalLocalApk:
+    emulator: str
+    apk_path: Path
 
 
 def require_adb() -> None:
@@ -214,6 +231,56 @@ def verify_downloaded_apk(manifest: ApkManifest, download_dir: Path) -> tuple[bo
     return True, str(apk_path)
 
 
+def verify_local_apk(apk_path: Path) -> tuple[bool, str]:
+    if not apk_path.exists():
+        return False, f"APK not found: {apk_path}"
+    if not apk_path.is_file():
+        return False, f"APK path is not a file: {apk_path}"
+    with apk_path.open("rb") as apk_file:
+        header = apk_file.read(4)
+    if header != b"PK\x03\x04":
+        return False, f"{apk_path.name} is not a valid APK/ZIP payload"
+    return True, str(apk_path)
+
+
+def resolve_optional_local_apks(download_dir: Path, manifests: list[ApkManifest]) -> list[OptionalLocalApk]:
+    manifest_filenames = {manifest.filename for manifest in manifests}
+    optional_apks: list[OptionalLocalApk] = []
+
+    for apk_path in sorted(download_dir.glob("*.apk")):
+        if apk_path.name in manifest_filenames:
+            continue
+        normalized_name = apk_path.name.lower()
+        for rule in OPTIONAL_LOCAL_APK_RULES:
+            prefixes = rule["match_prefixes"]
+            if any(normalized_name.startswith(prefix.lower()) for prefix in prefixes):
+                optional_apks.append(
+                    OptionalLocalApk(
+                        emulator=str(rule["emulator"]),
+                        apk_path=apk_path,
+                    )
+                )
+                break
+
+    return optional_apks
+
+
+def find_existing_packages_for_emulator(emulator: str, apk_name: str, installed_packages: list[str]) -> tuple[str | None, list[str]]:
+    rule = resolve_install_rule_for_emulator(emulator)
+    if rule is None:
+        rule = resolve_install_rule(apk_name)
+    if rule is None:
+        return None, []
+
+    grep_tokens = rule["grep_tokens"]
+    matches = [
+        package
+        for package in installed_packages
+        if any(token in package.lower() for token in grep_tokens)
+    ]
+    return str(rule["emulator"]), matches
+
+
 def install_apk(serial: str, apk_path: Path) -> tuple[bool, str]:
     result = subprocess.run(
         ["adb", "-s", serial, "install", "-r", str(apk_path)],
@@ -270,6 +337,7 @@ def main() -> int:
 
     serial = resolve_serial(args.serial)
     installed_packages = list_installed_packages(serial)
+    optional_local_apks = resolve_optional_local_apks(download_dir, manifests)
 
     print("=========================================================")
     print("      RETRODROID HOST INSTALLER: APK BOOTSTRAP PIPELINE  ")
@@ -277,6 +345,11 @@ def main() -> int:
     print(f"[*] adb serial: {serial}")
     print(f"[*] local manifest directory: {manifest_dir}")
     print(f"[*] local APK payload directory: {download_dir}\n")
+    if optional_local_apks:
+        print("[*] Optional local APKs detected for install-after-emulators:")
+        for apk in optional_local_apks:
+            print(f"    - {apk.apk_path.name}")
+        print()
     if args.dryrun:
         print("[*] Dry run mode enabled. No APK installs will be executed.\n")
 
@@ -318,6 +391,44 @@ def main() -> int:
         else:
             failed.append((manifest.filename, details))
             print(f"    [-] Install failed: {manifest.filename}")
+            print(f"        {details}")
+
+    for optional_apk in optional_local_apks:
+        ok, verification = verify_local_apk(optional_apk.apk_path)
+        if not ok:
+            failed.append((optional_apk.apk_path.name, verification))
+            print(f"[*] Cannot use {optional_apk.apk_path.name}...")
+            print(f"    [-] {verification}")
+            continue
+
+        emulator, existing_packages = find_existing_packages_for_emulator(
+            optional_apk.emulator,
+            optional_apk.apk_path.name,
+            installed_packages,
+        )
+        if existing_packages:
+            details = (
+                f"emulator `{emulator}` already has installed package(s): "
+                f"{', '.join(existing_packages)}. Uninstall the old emulator manually before installing {optional_apk.apk_path.name}."
+            )
+            skipped.append((optional_apk.apk_path.name, details))
+            print(f"[*] Skipping {optional_apk.apk_path.name}...")
+            print(f"    [!] {details}")
+            continue
+
+        if args.dryrun:
+            planned.append(optional_apk.apk_path.name)
+            print(f"[*] Would install {optional_apk.apk_path.name}...")
+            continue
+
+        print(f"[*] Installing {optional_apk.apk_path.name}...")
+        ok, details = install_apk(serial, optional_apk.apk_path)
+        if ok:
+            installed.append(optional_apk.apk_path.name)
+            print(f"    [+] Installed: {optional_apk.apk_path.name}")
+        else:
+            failed.append((optional_apk.apk_path.name, details))
+            print(f"    [-] Install failed: {optional_apk.apk_path.name}")
             print(f"        {details}")
 
     print("\n============================= SUMMARY =============================")

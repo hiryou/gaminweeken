@@ -77,6 +77,14 @@ isolated SSH daemon:
 4. Install the separate **Termux:Boot** Android companion app if you want `sshd` to start automatically after a reboot.
 5. *Automation Note:* Append `sshd` to your boot script configuration at `~/.termux/boot/` to make the daemon persistent
    on power cycling. This boot script will not run unless **Termux:Boot** has been installed and opened at least once.
+6. *Shell Helper Note:* After running the repo's Droid setup pipeline, new bash sessions in Termux will also load:
+   ```bash
+   watch_cpu
+   ```
+   This helper shows all thermal zone temperatures and is installed from the tracked artifact:
+   ```text
+   artifacts/termux/watch_cpu.bash
+   ```
 
 ---
 
@@ -117,9 +125,47 @@ media partition:
 
 ## 🚀 Phase 5: Automated Execution Profiles (Python Toolkit Deployment)
 
-This repository contains a modular automation toolkit (`download_apks.sh`, `setup_droid.sh`, plus the supporting
-scripts under `scripts/`) to handle device initialization, host-side APK management, and localized artwork
+This repository contains a modular automation toolkit (`download_apks.sh`, `setup_droid.sh`, `setup_retroarch.sh`,
+plus the supporting scripts under `scripts/`) to handle device initialization, host-side APK management, RetroArch
+core provisioning, and localized artwork
 synchronization.
+
+### Key Mapper Backup Artifact
+
+This setup also assumes you may want to preserve the final `Key Mapper` controller hotkeys configured directly on the
+Droid. The app stores its mappings in private app storage, so the portable artifact is the app's own exported backup
+ZIP, not a plain readable config file.
+
+Verified installed version on the Droid used for this repo:
+
+```text
+Key Mapper 4.2.0-foss
+```
+
+Recommended source channel for this setup:
+
+```text
+Download the Key Mapper APK from the official Key Mapper website / docs flow,
+not from the GitHub releases page.
+```
+
+This repo's documented hotkey backup / restore flow assumes the installed build is:
+
+```text
+Key Mapper 4.2.0-foss from the official website distribution path
+```
+
+Keep the exported backup ZIP under:
+
+```text
+artifacts/keymapper/
+```
+
+Recommended filename:
+
+```text
+artifacts/keymapper/keymapper-backup.zip
+```
 
 ### 📋 Prerequisites
 Before executing the host-side entrypoints, ensure the required Python and transport dependencies are available:
@@ -152,6 +198,8 @@ Refresh the auto-downloadable emulator APK cache and manifests:
 alongside the manifest files.
 *   **Pinned Source Exceptions:** A few emulators use predefined direct artifact URLs instead of live release discovery.
 This is currently how **AetherSX2**, **Sudachi**, and **Dolphin** are handled.
+*   **ES-DE Android APK:** If you have a locally obtained official ES-DE APK, place it directly under
+`artifacts/apks/`. The host setup pipeline will detect it and install it after the emulator APKs.
 *   **Warning Behavior:** If an emulator's official source is no longer machine-downloadable and no pinned fallback is
 configured, the script prints a noticeable warning summary.
 
@@ -166,6 +214,48 @@ device-side folder layout under `/storage/emulated/0/RetroGames` and `/sdcard/Do
 *   **Nested Host Install Step:** Validates every tracked manifest and APK payload pair, then installs only the
 emulators that are not already present on the device.
 
+#### Step 2.5: Key Mapper Hotkey Restore
+If you have already exported a working Key Mapper backup ZIP into this repo, restore it after the normal host setup.
+
+1. Push the backup ZIP to the Droid:
+   ```bash
+   adb shell mkdir -p /sdcard/Download/retrodroid/keymapper
+   adb push artifacts/keymapper/keymapper-backup.zip /sdcard/Download/retrodroid/keymapper/
+   ```
+2. Open `Key Mapper` on the Droid.
+3. Use its restore flow to import the ZIP from:
+   ```text
+   /sdcard/Download/retrodroid/keymapper/keymapper-backup.zip
+   ```
+4. Re-enable any Android permissions the app asks for again:
+   - Accessibility service
+   - notification access, if you use it
+   - input method, if you use DPAD-trigger mappings
+
+Important limitation:
+- this repo does not currently auto-drive the Key Mapper restore UI
+- the restore artifact is portable, but the import step is still manual
+
+#### Step 2.6: Key Mapper Backup Refresh
+After changing hotkeys on the Droid, export a fresh Key Mapper backup ZIP from the app and pull it back into this repo.
+
+1. In `Key Mapper`, use:
+   ```text
+   Settings -> Back up everything
+   ```
+2. Save the backup ZIP somewhere under:
+   ```text
+   /sdcard/Download/retrodroid/keymapper/
+   ```
+3. Pull it back into the repo:
+   ```bash
+   mkdir -p artifacts/keymapper
+   adb pull /sdcard/Download/retrodroid/keymapper/keymapper-backup.zip artifacts/keymapper/
+   ```
+
+This exported ZIP is the supported backup format because the live mappings are stored under Key Mapper's private
+Android app data directory and are not directly readable over normal `adb`.
+
 #### Tracked APK Metadata
 Track installable APKs by storing JSON manifest files under:
 ```text
@@ -177,6 +267,32 @@ artifacts/apks/
 #### Step 3: Game & Media Content Ingestion
 1. Move your verified system ROM files into their respective subfolders inside `/RetroGames/roms/`.
 2. Move your raw scraped or manual game artwork image selections into `/RetroGames/media_staging/`.
+3. Configure ES-DE frontend routing using the dedicated mapping reference:
+   [es-de-mapping.md](./es-de-mapping.md)
+4. Restore your exported `Key Mapper` backup ZIP if you use controller-only OS shortcuts such as:
+   - `ES-DE` foreground -> open Android power menu
+   - `SystemUI` foreground -> tap restart/shutdown coordinates
+   - global `Home` / `Back` controller combos
+5. If you want to use RetroArch-backed systems such as `nes`, install the matching RetroArch cores:
+```bash
+./setup_retroarch.sh
+```
+   This installs the shared RetroArch core files. After that, open RetroArch once and use
+   `Load Core` for each system you plan to launch from ES-DE.
+6. Check whether any RetroArch BIOS / firmware files are still missing for `ps1` and `dreamcast`:
+```bash
+./check_retroarch_bios.sh
+```
+
+#### Key Mapper Screenshot Note
+This repo does not yet include polished `Key Mapper` screenshots because the app did not produce a usable `adb`
+screen capture during documentation work. If you want the docs illustrated, add these screenshots manually later:
+
+```text
+1. Key Mapper main mappings list
+2. Key Mapper backup / restore screen
+3. One foreground-app-constrained mapping example
+```
 
 #### Step 4: Interface Artwork Acquisition & Synchronization
 To easily add covers and interface art to your game menu wheels, load your unified media management app tool over your SSH shell:
