@@ -1,0 +1,192 @@
+$ nc -zv 192.168.0.99 5555
+Connection to 192.168.0.99 port 5555 [tcp/personal-agent] succeeded!
+
+$ which adb
+$ brew install --cask android-platform-tools
+
+$ adb connect 192.168.0.99:5555
+connected to 192.168.0.99:5555
+
+$ adb devices
+List of devices attached
+192.168.0.99:5555	device
+
+$ adb shell ls -la /sdcard/Downloads/
+$ adb shell df -h /sdcard/
+
+$ adb push ~/Downloads/car/ /sdcard/Download/
+$ adb shell du -sh /sdcard/Download/car/
+
+$ adb shell df -h /sdcard/
+Filesystem      Size Used Avail Use% Mounted on
+/dev/fuse       113G 256M  113G   1% /storage/emulated
+
+
+F-Droid's controller keymapper for the OS
+https://f-droid.org/en/packages/io.github.sds100.keymapper/
+$ adb install ~/Downloads/io.github.sds100.keymapper_253.apk
+
+
+$ adb push content-sdcard/0 /sdcard/
+
+
+either:
+$ adb devices
+$ adb install termux-app_v*.apk
+or:
+$ adb push termux-app_v*.apk /sdcard/Download/com.termux_1002.apk
+$ adb shell pm install /sdcard/Download/com.termux_1002.apk
+
+then:
+$ adb shell pm list packages | grep termux
+
+$ brew install scrcpy
+$ adb devices
+$ scrcpy
+
+
+Enaable sshd upon boot
+$ sshd
+$ ss -ltnp | grep 8022
+$ whoami	# <- this is to acquire the termux userID
+u0_a77
+$ termux-wake-lock	# run once to allow termux app running in background
+
+$ mkdir -p ~/.termux/boot
+cat > ~/.termux/boot/start_ssh.sh <<'EOF'
+#!/data/data/com.termux/files/usr/bin/sh
+termux-wake-lock
+sshd
+EOF
+chmod +x ~/.termux/boot/start_ssh.sh
+
+# (via scrcpy), GUI: Launch the Termux:Boot app from your Android application drawer at least once manually. This
+# registers the application with the system's startup triggers. <- this step is very crucial to make it work!
+
+
+$ ssh-copy-id -p 8022 -i ~/.ssh/id_rsa.pub u0_a77@192.168.0.99
+$ ssh -p 8022 u0_a77@192.168.0.99
+
+
+
+# watching CPU temp
+# watch -n 2 'cat /sys/class/thermal/thermal_zone*/temp'
+watch -n 2 'for z in /sys/class/thermal/thermal_zone*; do echo -n "$(basename "$z") "; awk "{printf \"%.1f°C\n\", \$1/1000}" "$z/temp"; done'
+# rules:
+# 55000 = 55°C
+# 70000 = 70°C
+# 85000 = 85°C
+# <60°C   excellent
+# 60–70°C fine
+# 70–80°C warm but okay
+# 80–85°C caution
+# 85°C+   improve cooling / stop heavy test
+
+
+To disable upon boot Update notification
+$ adb shell pm disable-user --user 0 android.rockchip.update.service
+$ adb shell pm clear android.rockchip.update.service
+$ adb reboot
+
+If the first command says Unknown package, find the actual updater package on your build:
+$ adb shell pm list packages | grep -Ei 'rockchip|ota|update|upgrade'
+
+To enable it back:
+$ adb shell pm enable android.rockchip.update.service
+
+
+Need to install rsync on termux
+$ termux-change-repo
+# Pick Single mirror, then choose either:
+#  - packages.termux.dev
+#  - packages-cf.termux.dev
+$ apt clean
+$ app update
+$ pkg install rsync openssh -y
+
+then rsync, create folder path on the fly at destination
+$ rsync -avzu --exclude='.DS_Store' --exclude='_ignore' -e 'ssh -p 8022' --rsync-path='mkdir -p /sdcard/Download/retrodroid/scripts && rsync' scripts/ u0_a77@192.168.0.99:/sdcard/Download/retrodroid/scripts/
+
+then run like this
+$ bash controller.sh
+
+
+Optional apks download
+$ python3 scripts/download_apks.py --dryrun
+$ python3 scripts/download_apks.py --dryrun --only switch_citron_neo
+$ python3 scripts/download_apks.py --dryrun --only ps2_aethersx2 switch_sudachi gamecube_dolphin
+
+Install curated APKs
+$ adb devices
+List of devices attached
+192.168.0.99:5555	device
+
+$ python3 scripts/bootstrap_apks.py --dryrun
+$ python3 scripts/bootstrap_apks.py --serial 192.168.0.99:5555
+=========================================================
+RETRODROID HOST INSTALLER: APK BOOTSTRAP PIPELINE
+=========================================================
+
+[*] adb serial: 192.168.0.99:5555
+[*] local APK directory: /Users/longn/github/hiryou/gaminweeken/retrodroid/artifacts/apks
+
+[*] Installing Mupen64PlusAE-release.apk...
+[+] Installed: Mupen64PlusAE-release.apk
+[*] Installing RetroArch_aarch64.apk...
+[+] Installed: RetroArch_aarch64.apk
+[*] Installing app-mainline-release.apk...
+[+] Installed: app-mainline-release.apk
+[*] Installing azaharplus-2125.1-B-android_coexists_with_azahar.apk...
+[+] Installed: azaharplus-2125.1-B-android_coexists_with_azahar.apk
+
+============================= SUMMARY =============================
+[+] Local APKs discovered: 4
+[+] APK installs succeeded: 4
+- Mupen64PlusAE-release.apk
+- RetroArch_aarch64.apk
+- app-mainline-release.apk
+- azaharplus-2125.1-B-android_coexists_with_azahar.apk
+
+
+longn:~/github/hiryou/gaminweeken/retrodroid (master)
+$ adb shell dumpsys input | grep -i -A6 -B2 8bitdo
+ConfigurationFile:
+VideoDevice: <none>
+27: 8BitDo 8BitDo Pro 2
+Classes: KEYBOARD | GAMEPAD | JOYSTICK | EXTERNAL
+Path: /dev/input/event5
+Enabled: true
+Descriptor: 66c6cb042137a88e582c22d14c9e1e0636d5bd59
+Location: usb-fc840000.usb-1/input0
+ControllerNumber: 1
+--
+
+Input Reader State (Nums of device: 6):
+Device 27: 8BitDo 8BitDo Pro 2
+EventHub Devices: [ 27 ]
+Generation: 118
+IsExternal: true
+AssociatedDisplayPort: <none>
+AssociatedDisplayUniqueId: <none>
+HasMic:     false
+longn:~/github/hiryou/gaminweeken/retrodroid (master)
+
+
+
+
+
+- ./download_apks.sh --dryrun --only switch_citron_neo
+- ./setup_droid.sh --dryrun
+- ./setup_droid.sh u0_a77@192.168.0.99
+
+
+
+
+
+$ tar czf - scripts | ssh -p 8022 u0_a77@192.168.0.99 '
+mkdir -p ~/retrodroid &&
+tar xzf - -C ~/retrodroid &&
+~/retrodroid/scripts/setup.sh
+'
+
+

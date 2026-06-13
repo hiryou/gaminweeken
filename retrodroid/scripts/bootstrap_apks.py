@@ -7,6 +7,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import tempfile
+import zipfile
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -78,6 +80,11 @@ APK_INSTALL_RULES = [
         "grep_tokens": ("dolphin",),
     },
     {
+        "match_prefixes": ("duckstation", "DuckStation"),
+        "emulator": "duckstation",
+        "grep_tokens": ("duckstation",),
+    },
+    {
         "match_prefixes": ("ES-DE", "ES_DE", "es-de", "es_de", "EmulationStation"),
         "emulator": "esde",
         "grep_tokens": ("emulationstation", "es_de", "es-de"),
@@ -93,6 +100,7 @@ class ApkManifest:
     source_url: str
     sha256: str
     size: int
+    optional: bool = False
 
     @property
     def download_path(self) -> Path:
@@ -208,6 +216,7 @@ def load_manifest(manifest_path: Path) -> ApkManifest:
         source_url=str(data["source_url"]),
         sha256=str(data["sha256"]),
         size=int(data["size"]),
+        optional=bool(data.get("optional", False)),
     )
 
 
@@ -231,6 +240,30 @@ def verify_downloaded_apk(manifest: ApkManifest, download_dir: Path) -> tuple[bo
     return True, str(apk_path)
 
 
+def list_device_abis(serial: str) -> list[str]:
+    result = subprocess.run(
+        ["adb", "-s", serial, "shell", "getprop", "ro.product.cpu.abilist"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode == 0:
+        abis = [abi.strip() for abi in result.stdout.strip().split(",") if abi.strip()]
+        if abis:
+            return abis
+
+    fallback = subprocess.run(
+        ["adb", "-s", serial, "shell", "getprop", "ro.product.cpu.abi"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if fallback.returncode != 0:
+        raise RuntimeError(fallback.stderr.strip() or "Failed to query device ABI")
+    abi = fallback.stdout.strip()
+    return [abi] if abi else []
+
+
 def verify_local_apk(apk_path: Path) -> tuple[bool, str]:
     if not apk_path.exists():
         return False, f"APK not found: {apk_path}"
@@ -241,6 +274,46 @@ def verify_local_apk(apk_path: Path) -> tuple[bool, str]:
     if header != b"PK\x03\x04":
         return False, f"{apk_path.name} is not a valid APK/ZIP payload"
     return True, str(apk_path)
+
+
+def install_apkm(serial: str, apkm_path: Path) -> tuple[bool, str]:
+    with tempfile.TemporaryDirectory(prefix="retrodroid_apkm_") as temp_dir:
+        temp_root = Path(temp_dir)
+        with zipfile.ZipFile(apkm_path) as archive:
+            archive.extractall(temp_root)
+
+        base_apk = temp_root / "base.apk"
+        if not base_apk.exists():
+            return False, f"{apkm_path.name} is missing base.apk"
+
+        chosen_split: Path | None = None
+        device_abis = list_device_abis(serial)
+        for abi in device_abis:
+            candidate = temp_root / f"split_config.{abi.replace('-', '_')}.apk"
+            if candidate.exists():
+                chosen_split = candidate
+                break
+
+        if chosen_split is None:
+            return False, (
+                f"no matching ABI split found in {apkm_path.name} for device ABIs: "
+                f"{', '.join(device_abis) or 'unknown'}"
+            )
+
+        result = subprocess.run(
+            ["adb", "-s", serial, "install-multiple", "-r", str(base_apk), str(chosen_split)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        details = "\n".join(
+            part.strip() for part in (result.stdout, result.stderr) if part and part.strip()
+        ).strip()
+        if result.returncode == 0 and "Success" in details:
+            return True, details
+        if not details:
+            details = f"`adb install-multiple` exited with status {result.returncode}"
+        return False, details
 
 
 def resolve_optional_local_apks(download_dir: Path, manifests: list[ApkManifest]) -> list[OptionalLocalApk]:
@@ -282,6 +355,9 @@ def find_existing_packages_for_emulator(emulator: str, apk_name: str, installed_
 
 
 def install_apk(serial: str, apk_path: Path) -> tuple[bool, str]:
+    if apk_path.suffix.lower() == ".apkm":
+        return install_apkm(serial, apk_path)
+
     result = subprocess.run(
         ["adb", "-s", serial, "install", "-r", str(apk_path)],
         capture_output=True,
@@ -361,6 +437,12 @@ def main() -> int:
     for manifest in manifests:
         ok, verification = verify_downloaded_apk(manifest, download_dir)
         if not ok:
+            if manifest.optional and verification.startswith("downloaded APK not found:"):
+                details = f"optional local payload missing: {manifest.filename}"
+                skipped.append((manifest.filename, details))
+                print(f"[*] Skipping {manifest.filename}...")
+                print(f"    [!] {details}")
+                continue
             failed.append((manifest.filename, verification))
             print(f"[*] Cannot use {manifest.filename}...")
             print(f"    [-] {verification}")

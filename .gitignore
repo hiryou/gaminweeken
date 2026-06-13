@@ -8,7 +8,7 @@ batodropin/out/
 RetroGames/installers/
 # newly downloaded apks
 retrodroid/artifacts/apks/*.apk
-retrodroid/artifacts/download/*.apk
+retrodroid/artifacts/apks/*.apkm
 
 # Ignore game data files and personal ROM collections
 RetroGames/roms/
@@ -24,4 +24,7 @@ __pycache__/
 
 tmp/
 .venv*
+
+# local retro system
+retrodroid/retrogaming
 

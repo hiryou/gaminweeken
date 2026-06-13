@@ -1,309 +1,313 @@
-# Orange Pi 5 Premium Retro Console Engine (Android Backend Integration)
+# RetroDroid
 
-This repository contains the architecture, configuration scripts, and documentation required to transform an **Orange Pi
-5**
-Single Board Computer into a high-performance, appliance-like retro gaming console.
+>> 🕰️ 1985. A hot afternoon, a 14-inch CRT, a world opening in phosphor glow. 📺🕹️
+>
+> We can't relive those days, but in the nostalgia these games still carry, their joy lingers close.
 
-By leveraging the proprietary Android graphics drivers alongside an automated frontend pipeline and an SSH terminal
-daemon,
-this configuration bypasses standard ARM-Linux emulation limits to unlock full-speed **PS2, 3DS, and Nintendo Switch**
-gameplay within a seamless console GUI.
+![Droid app drawer with Taskbar / utility apps](static/home-console.png)
 
----
+## 🛠️ Why This Project Exists
 
-## 💡 Project Architecture & Rationale
+To turn an [Orange Pi 5](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/details/Orange-Pi-5.html)
+into a console-style retro system without treating "maximum uniformity" as the only goal.
 
-### The Driver Bottleneck: Why Android Beats Linux/Batocera
+[Batocera](https://batocera.org/download) is cleaner, more unified, and easier to reason about as a traditional retro
+appliance. This project deliberately gives up some of that neatness in exchange for better headroom on the systems
+that benefit most from Android-native emulators and vendor GPU drivers.
 
-While **Batocera v42** is an excellent turnkey solution built via *Buildroot*, it relies on the open-source
-**Mesa (Panfrost/PanVK)** reverse-engineered graphics driver pipeline. On ARM-based hardware like the Rockchip RK3588,
-this open-source layer lacks vendor-level optimization, causing severe stuttering during shader compilation and high-end
-3D translation. Furthermore, high-end emulators like PCSX2 lack an active, optimized native Linux-ARM64 JIT (
-Just-In-Time)
-compiler.
+That [rationale](./docs/rationale.md) behind the trade is the point of the project.
 
-**Orange Pi OS (Android Droid)** utilizes official, closed-source **Proprietary Hardware Abstraction Layers (HAL)** and
-official drivers provided directly by Rockchip and ARM. This allows hardware-accelerated Vulkan 1.3/OpenGL ES rendering
-pipelines to operate at native silicon speeds, unlocking smooth upscaled performance for modern platforms.
+## Quick Setup
 
----
+The end result runs [Orange Pi OS](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-pi-5.html) 
+as a console-style retro box with [ES-DE](https://es-de.org/) plus a curated
+Android emulator stack. The point versus Batocera is simple: Batocera is cleaner and more unified, but Droid gets
+better GPU driver support on RK3588, which matters for heavier systems like PS2, 3DS, and Switch.
 
-## 💾 Prerequisites & Hardware Configuration
+### 1. Flash the OS
+Manual.
 
-* **SBC Hardware:** Orange Pi 5 (Standard Edition / RK3588).
-* **Storage Medium:**
-  [Samsung PRO Ultimate 128GB MicroSD Card](https://amazon.com) (A2, V30, U3 rated for high random read/write
-  throughput).
-* **Controller Specification:** 8BitDo Pro 2 (Wired USB Mode).
-    * *Critical Hardware Toggle:* Set the physical mode slider on the back of the controller to **"D" (D-Input)** or
-      **"A" (Android)** to bypass the slow Bluetooth polling stack and limit input latency to an imperceptible
-      **4ms - 12ms**.
+You need to do this one a Windows machine. Flash the official Orange Pi Droid image to the SD card using the 
+vendor tooling. Boot the board and finish the normal Android first-boot flow.
 
----
+Before continuing, enable Android developer options and make sure `adb` debugging is available on the Droid.
 
-## 🛠️ Phase 1: Operating System Flash (The Android Base)
+### 2. Prepare the Host
+Manual on the host.
 
-Standard imaging utilities (e.g., BalenaEtcher or Rufus) **will fail** due to Android's non-standard multi-partition
-GUID
-partition table.
+Make sure these exist:
 
-1. Download the **Orange Pi OS (Droid) Android 12 "TF Card Image"** from the official support registry.
-2. Decompress the double-archived download file (`.tar.gz` -> `.tar` -> `.img`) using **7-Zip**.
-3. Launch the official Rockchip **SDDiskTool** utility.
-4. Select the Target MicroSD card, check the **"SD Boot"** parameter checkbox, attach the unpacked `.img` target file,
-   and execute **Create**.
-
----
-
-## 📂 Phase 2: Remote Terminal Shell (SSH Daemon via Termux)
-
-To manage system files, push configurations, and run automation scripts without looking at an Android desktop, set up an
-isolated SSH daemon:
-
-1. Install the **Termux APK** (sourced from F-Droid or direct GitHub repository).
-2. Expose the shell and initialize the ecosystem over the network by executing:
-   ```bash
-   pkg update && pkg upgrade -y
-   pkg install openssh python iproute2 -y
-   # considered: termux-services
-   passwd
-   sshd
-   ```
-3. **Remote Connection Rule:** Termux standardizes its secure socket traffic on **Port 8022** instead of the standard
-   Port 22. Connect via your desktop terminal terminal using:
-   ```bash
-   ssh -p 8022 <orange_pi_ip_address>
-   ```
-4. Install the separate **Termux:Boot** Android companion app if you want `sshd` to start automatically after a reboot.
-5. *Automation Note:* Append `sshd` to your boot script configuration at `~/.termux/boot/` to make the daemon persistent
-   on power cycling. This boot script will not run unless **Termux:Boot** has been installed and opened at least once.
-6. *Shell Helper Note:* After running the repo's Droid setup pipeline, new bash sessions in Termux will also load:
-   ```bash
-   watch_cpu
-   ```
-   This helper shows all thermal zone temperatures and is installed from the tracked artifact:
-   ```text
-   artifacts/termux/watch_cpu.bash
-   ```
-
----
-
-## 📁 Phase 3: Exact Storage Path Layout (The ROM Backbone)
-
-When accessing the file system via your remote SSH terminal shell inside Termux, the local directory paths differ from
-traditional desktop Linux.
-
-Android maps its shared media environment down to an internal virtual storage mountpoint. Below is the precise path
-directory target profile you must map within your automation configurations:
-
----
-
-## 📁 Where to Place the Artwork to Display Safely in the GUI
-
-To make the downloaded artwork images display cleanly on your console frontend without cluttering your game list, 
-place them into the dedicated media directories generated by ES-DE (EmulationStation Desktop Edition).When ES-DE 
-scans your folders for the first time, it maps and locks down the standard path structure inside your primary internal
-media partition:
-
-```text
-📁 /storage/emulated/0/ES-DE/downloaded_media/
-│
-├── 📁 3ds/
-│   ├── 📁 miximages/      <-- [RECOMMENDED] Drop scraped 3D Box/FanArt compositions here
-│   ├── 📁 covers/          <-- Drop traditional flat front cover 2D box art elements here
-│   └── 📁 screenshots/     <-- Drop in-game capture files here
-│
-├── 📁 ps2/
-│   ├── 📁 miximages/      <-- Drop matching file-named PS2 composition art files here
-│   └── 📁 covers/
-│
-└── 📁 snes/
-    └── 📁 miximages/      <-- Drop matching file-named Super Nintendo art files here
+```bash
+adb version
+ssh -V
+tar --version
+python3 -m pip install requests
 ```
 
----
+If you want a live screen for setup or debugging:
 
-## 🚀 Phase 5: Automated Execution Profiles (Python Toolkit Deployment)
-
-This repository contains a modular automation toolkit (`download_apks.sh`, `setup_droid.sh`, `setup_retroarch.sh`,
-plus the supporting scripts under `scripts/`) to handle device initialization, host-side APK management, RetroArch
-core provisioning, and localized artwork
-synchronization.
-
-### Key Mapper Backup Artifact
-
-This setup also assumes you may want to preserve the final `Key Mapper` controller hotkeys configured directly on the
-Droid. The app stores its mappings in private app storage, so the portable artifact is the app's own exported backup
-ZIP, not a plain readable config file.
-
-Verified installed version on the Droid used for this repo:
-
-```text
-Key Mapper 4.2.0-foss
+```bash
+scrcpy
 ```
 
-Recommended source channel for this setup:
+### 3. Review Device Config
+Manual on the host.
 
-```text
-Download the Key Mapper APK from the official Key Mapper website / docs flow,
-not from the GitHub releases page.
+Edit:
+
+```bash
+config/droid-config.sh
 ```
 
-This repo's documented hotkey backup / restore flow assumes the installed build is:
+Then load it:
 
-```text
-Key Mapper 4.2.0-foss from the official website distribution path
+```bash
+. config/droid-config.sh
 ```
 
-Keep the exported backup ZIP under:
+Important values after sourcing:
+- `DROID_ADB_SERIAL`: the `adb` device target, for example `192.168.0.99:5555`
+- `DROID_SSH_TARGET`: the SSH target, for example `u0_a77@192.168.0.99`
+- `SSH_PORT`: Termux SSH port, normally `8022`
 
-```text
-artifacts/keymapper/
+Quick sanity check:
+
+```bash
+echo "$DROID_ADB_SERIAL"
+echo "$DROID_SSH_TARGET"
 ```
 
-Recommended filename:
+### 4. Connect ADB Over the Network
+Manual on the host.
+
+Connect to the Droid and confirm it is visible:
+
+```bash
+adb connect "$DROID_ADB_SERIAL"
+adb devices
+```
+
+### 5. Install Utility Apps
+Manual. Install from the host with `adb`, then finish first-run setup on the Droid.
+
+Reference pages:
+- `Termux` homepage: https://f-droid.org/en/packages/com.termux/
+- `Termux` APK used in this setup: https://f-droid.org/repo/com.termux_1002.apk
+- `Key Mapper` homepage: https://f-droid.org/en/packages/io.github.sds100.keymapper/
+- `Key Mapper` APK used in this setup: https://f-droid.org/repo/io.github.sds100.keymapper_256.apk
+
+Install from the host:
+
+```bash
+adb -s "$DROID_ADB_SERIAL" install ~/Downloads/com.termux_1002.apk
+adb -s "$DROID_ADB_SERIAL" install ~/Downloads/io.github.sds100.keymapper_256.apk
+```
+
+If you want SSH after reboot, install `Termux:Boot` too.
+
+### 6. Initialize Termux
+Manual on the Droid.
+
+1. Open `Termux` once.
+2. Run:
+
+```bash
+pkg update && pkg upgrade -y
+pkg install openssh python iproute2 rsync -y
+passwd
+sshd
+```
+
+Termux SSH listens on port `8022`.
+
+If you want SSH after reboot, create `~/.termux/boot/start-sshd` manually:
+
+```sh
+#!/data/data/com.termux/files/usr/bin/sh
+termux-wake-lock
+sshd
+```
+
+Then make it executable:
+
+```bash
+chmod +x ~/.termux/boot/start-sshd
+```
+
+### 7. Enable SSH After Reboot
+Manual on the Droid, then optional host step.
+
+Launch the `Termux:Boot` app from the Android application drawer at least once manually. This registers the app with
+Android's startup triggers, and SSH-after-reboot will not work until you do it.
+
+Reference screenshot of the app drawer:
+
+![Droid app drawer with Taskbar / utility apps](static/droid-tskbar-apps.png)
+
+Optional but recommended: copy your SSH key now that Termux `sshd` is running.
+
+```bash
+ssh-copy-id -p "$SSH_PORT" "$DROID_SSH_TARGET"
+```
+
+### 8. Optional APK Refresh
+Scripted on the host.
+
+If you want to refresh the downloadable emulator APK cache:
+
+```bash
+./download_apks.sh
+```
+
+If you have a locally obtained ES-DE APK, place it under:
+
+```text
+artifacts/apks/
+```
+
+### 9. Buy and Provide ES-DE
+Manual.
+
+Before the main setup, buy ES-DE once from:
+
+- https://es-de.org/
+
+Then place the APK you received under:
+
+```text
+artifacts/apks/
+```
+
+The main setup script requires this APK and will fail if it is missing.
+
+### 10. Run the Main Setup
+Scripted on the host.
+
+```bash
+./setup_droid.sh "$DROID_SSH_TARGET" "$DROID_ADB_SERIAL"
+```
+
+What this does:
+- streams the tracked setup scripts to the Droid
+- creates the core folder layout under `/sdcard/RetroGames`
+- installs tracked emulator APKs over `adb`
+- installs optional ES-DE custom system XMLs
+- installs the `watch_cpu` shell helper in Termux
+
+What this does not do:
+- it does not complete Android app permission prompts for you
+- it does not fully configure ES-DE emulator routing for you
+- it does not install manual utility apps like `Termux`, `Termux:Boot`, or `Key Mapper`
+
+### 11. Launch ES-DE Once
+Manual on the Droid.
+
+1. Open `ES-DE`.
+2. Point it at:
+
+```text
+/sdcard/RetroGames/ROMs/
+```
+
+3. Let it build its initial folders and scan.
+
+On this Droid build, `/sdcard/` and `/storage/emulated/0/` refer to the same shared storage.
+This repo uses `/sdcard/` as the canonical path in docs.
+
+### 12. Install RetroArch Cores
+Scripted on the host, then manual in RetroArch.
+
+Install the shared core files:
+
+```bash
+./setup_retroarch.sh --serial "$DROID_ADB_SERIAL"
+```
+
+Then open `RetroArch` manually and use `Load Core` once for each core you plan to launch from ES-DE.
+
+### 13. Check BIOS / Firmware
+Scripted on the host.
+
+```bash
+./check_retroarch_bios.sh --serial "$DROID_ADB_SERIAL"
+```
+
+This validates the current RetroArch-side BIOS files against Batocera checksum references for the
+systems the checker supports.
+
+### 14. Configure Emulator Routing
+Manual on the Droid.
+
+Use:
+
+- [es-de-mapping.md](./es-de-mapping.md)
+
+This is where you choose which standalone emulator or RetroArch target each system should use.
+
+### 15. Key Mapper First Setup / Restore
+Manual on the Droid, plus optional host push.
+
+Open `Key Mapper` once and grant the permissions it asks for.
+
+If you keep a Key Mapper backup in:
 
 ```text
 artifacts/keymapper/keymapper-backup.zip
 ```
 
-### 📋 Prerequisites
-Before executing the host-side entrypoints, ensure the required Python and transport dependencies are available:
+push it from host:
+
 ```bash
-# on Termux
-pkg update && pkg upgrade -y
-pkg install python -y
-
-# on host
-python3 -m pip install requests
+adb -s "$DROID_ADB_SERIAL" shell mkdir -p /sdcard/Download/retrodroid/keymapper
+adb -s "$DROID_ADB_SERIAL" push artifacts/keymapper/keymapper-backup.zip /sdcard/Download/retrodroid/keymapper/
 ```
 
-If you plan to run the host-side orchestration pipeline, also ensure these tools are available on the host:
+Then import it manually inside `Key Mapper`.
+
+### 16. Make It Feel Like a Console
+Manual on the Droid, plus optional host commands for maintenance.
+
+Goal:
+- set `ES-DE` as the Android home app
+- keep the third-party desktop taskbar hidden during normal use
+- only bring the taskbar back temporarily when you need maintenance UI
+
+On the Droid:
+1. Set `ES-DE` as the default home app in Android settings.
+2. In Droid OS taskbar settings, disable `Allows taskbar to perform button press actions`.
+3. In Droid OS taskbar settings, disable its ability to display over other apps.
+
+You can also make the taskbar disappear by running this from host:
+
 ```bash
-adb version
-ssh -V
-tar --version
+adb -s "$DROID_ADB_SERIAL" shell cmd appops set com.farmerbb.taskbar.androidx86 SYSTEM_ALERT_WINDOW deny
 ```
 
-### 🎛️ Script Execution Pipeline
+To bring the taskbar back, run from host:
 
-Use the two host-side entrypoints below to run the full setup flow.
-
-#### Step 1: Optional Host APK Refresh
-Refresh the auto-downloadable emulator APK cache and manifests:
 ```bash
-./download_apks.sh
-```
-*   **Resulting Architecture:** Downloads the APKs it can fetch automatically into `artifacts/apks/` on the host,
-alongside the manifest files.
-*   **Pinned Source Exceptions:** A few emulators use predefined direct artifact URLs instead of live release discovery.
-This is currently how **AetherSX2**, **Sudachi**, and **Dolphin** are handled.
-*   **ES-DE Android APK:** If you have a locally obtained official ES-DE APK, place it directly under
-`artifacts/apks/`. The host setup pipeline will detect it and install it after the emulator APKs.
-*   **Warning Behavior:** If an emulator's official source is no longer machine-downloadable and no pinned fallback is
-configured, the script prints a noticeable warning summary.
-
-#### Step 2: Required Host Orchestration
-Run the full host orchestrator. This remotely initializes the Droid's directory layout and then installs
-host-tracked APKs over `adb` with idempotency checks:
-```bash
-./setup_droid.sh <ssh_target> [adb_serial]
-```
-*   **Nested Device Step:** Streams `scripts/` to the Droid, then runs the remote setup helper to create the
-device-side folder layout under `/storage/emulated/0/RetroGames` and `/sdcard/Download/retrodroid`.
-*   **Nested Host Install Step:** Validates every tracked manifest and APK payload pair, then installs only the
-emulators that are not already present on the device.
-
-#### Step 2.5: Key Mapper Hotkey Restore
-If you have already exported a working Key Mapper backup ZIP into this repo, restore it after the normal host setup.
-
-1. Push the backup ZIP to the Droid:
-   ```bash
-   adb shell mkdir -p /sdcard/Download/retrodroid/keymapper
-   adb push artifacts/keymapper/keymapper-backup.zip /sdcard/Download/retrodroid/keymapper/
-   ```
-2. Open `Key Mapper` on the Droid.
-3. Use its restore flow to import the ZIP from:
-   ```text
-   /sdcard/Download/retrodroid/keymapper/keymapper-backup.zip
-   ```
-4. Re-enable any Android permissions the app asks for again:
-   - Accessibility service
-   - notification access, if you use it
-   - input method, if you use DPAD-trigger mappings
-
-Important limitation:
-- this repo does not currently auto-drive the Key Mapper restore UI
-- the restore artifact is portable, but the import step is still manual
-
-#### Step 2.6: Key Mapper Backup Refresh
-After changing hotkeys on the Droid, export a fresh Key Mapper backup ZIP from the app and pull it back into this repo.
-
-1. In `Key Mapper`, use:
-   ```text
-   Settings -> Back up everything
-   ```
-2. Save the backup ZIP somewhere under:
-   ```text
-   /sdcard/Download/retrodroid/keymapper/
-   ```
-3. Pull it back into the repo:
-   ```bash
-   mkdir -p artifacts/keymapper
-   adb pull /sdcard/Download/retrodroid/keymapper/keymapper-backup.zip artifacts/keymapper/
-   ```
-
-This exported ZIP is the supported backup format because the live mappings are stored under Key Mapper's private
-Android app data directory and are not directly readable over normal `adb`.
-
-#### Tracked APK Metadata
-Track installable APKs by storing JSON manifest files under:
-```text
-artifacts/apks/
-```
-*   **Manifest Fields:** Each manifest stores the target APK filename, source URL, size, and `sha256`.
-*   **Payload Storage Rule:** The actual APK payloads live in `artifacts/apks/` beside the manifests.
-
-#### Step 3: Game & Media Content Ingestion
-1. Move your verified system ROM files into their respective subfolders inside `/RetroGames/roms/`.
-2. Move your raw scraped or manual game artwork image selections into `/RetroGames/media_staging/`.
-3. Configure ES-DE frontend routing using the dedicated mapping reference:
-   [es-de-mapping.md](./es-de-mapping.md)
-4. Restore your exported `Key Mapper` backup ZIP if you use controller-only OS shortcuts such as:
-   - `ES-DE` foreground -> open Android power menu
-   - `SystemUI` foreground -> tap restart/shutdown coordinates
-   - global `Home` / `Back` controller combos
-5. If you want to use RetroArch-backed systems such as `nes`, install the matching RetroArch cores:
-```bash
-./setup_retroarch.sh
-```
-   This installs the shared RetroArch core files. After that, open RetroArch once and use
-   `Load Core` for each system you plan to launch from ES-DE.
-6. Check whether any RetroArch BIOS / firmware files are still missing for `ps1` and `dreamcast`:
-```bash
-./check_retroarch_bios.sh
+adb -s "$DROID_ADB_SERIAL" shell cmd appops set com.farmerbb.taskbar.androidx86 SYSTEM_ALERT_WINDOW allow
+adb -s "$DROID_ADB_SERIAL" shell am start -n com.farmerbb.taskbar.androidx86/com.farmerbb.taskbar.MainActivity
 ```
 
-#### Key Mapper Screenshot Note
-This repo does not yet include polished `Key Mapper` screenshots because the app did not produce a usable `adb`
-screen capture during documentation work. If you want the docs illustrated, add these screenshots manually later:
+## ROM Placement
+
+Put ROMs under:
 
 ```text
-1. Key Mapper main mappings list
-2. Key Mapper backup / restore screen
-3. One foreground-app-constrained mapping example
+/sdcard/RetroGames/ROMs/<system>/
 ```
 
-#### Step 4: Interface Artwork Acquisition & Synchronization
-To easily add covers and interface art to your game menu wheels, load your unified media management app tool over your SSH shell:
+Exact ES-DE routing expectations are in [es-de-mapping.md](./es-de-mapping.md).
+
+## Notes
+
+- `watch_cpu` is installed into Termux shell startup by the setup pipeline. Open a new
+  Termux or SSH bash session and run:
+
 ```bash
-python manage_art.py
+watch_cpu
 ```
-*   **Option 1 (Scrape):** Lets you search a game title from text prompts, choose your preferred region variant, and 
-download it safely into your hardware staging folder.
-*   **Option 2 (Sync):** Automatically runs a fuzzy matching algorithm over your file paths, renames your downloaded 
-files to match your exact game file names, and safely transfers them into the strict path structure required 
-by **ES-DE** (`/ES-DE/downloaded_media/`).
 
-
----
+- PS Vita is not a plain ROM-folder system in the same way NES/SNES are.
+  Install Vita games through Vita3K's own supported flow.

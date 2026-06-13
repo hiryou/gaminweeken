@@ -5,17 +5,35 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-REMOTE_WORKDIR="/sdcard/Download/retrodroid"
-REMOTE_ESDE_CUSTOM_SYSTEMS="/sdcard/ES-DE/custom_systems"
+CONFIG_FILE="$SCRIPT_DIR/config/droid-config.sh"
+[ -f "$CONFIG_FILE" ] || {
+    echo "Missing config file: $CONFIG_FILE" >&2
+    exit 1
+}
+
+# shellcheck disable=SC1090
+. "$CONFIG_FILE"
+
+REMOTE_WORKDIR="${REMOTE_WORKDIR:-/sdcard/Download/retrodroid}"
+ESDE_ROOT="${ESDE_ROOT:-/sdcard/ES-DE}"
+REMOTE_ESDE_CUSTOM_SYSTEMS="${ESDE_ROOT}/custom_systems"
+SSH_PORT="${SSH_PORT:-8022}"
+DEFAULT_DROID_ADDRESS="${DROID_ADDRESS:-}"
+DEFAULT_SSH_USER="${SSH_USER:-}"
+DEFAULT_ADB_PORT="${ADB_PORT:-5555}"
 DRYRUN=0
 
 usage() {
     echo "Usage: $0 [--dryrun] <ssh_target> [adb_serial]"
     echo "Usage: $0 --dryrun [adb_serial]"
-    echo "Example: $0 u0_a77@192.168.0.99"
-    echo "Example: $0 u0_a77@192.168.0.99 192.168.0.99:5555"
+    if [ -n "$DEFAULT_SSH_USER" ] && [ -n "$DEFAULT_DROID_ADDRESS" ]; then
+        echo "Example: $0 ${DEFAULT_SSH_USER}@${DEFAULT_DROID_ADDRESS}"
+        echo "Example: $0 ${DEFAULT_SSH_USER}@${DEFAULT_DROID_ADDRESS} ${DEFAULT_DROID_ADDRESS}:${DEFAULT_ADB_PORT}"
+    fi
     echo "Example: $0 --dryrun"
-    echo "Example: $0 --dryrun 192.168.0.99:5555"
+    if [ -n "$DEFAULT_DROID_ADDRESS" ]; then
+        echo "Example: $0 --dryrun ${DEFAULT_DROID_ADDRESS}:${DEFAULT_ADB_PORT}"
+    fi
 }
 
 require_cmd() {
@@ -23,6 +41,25 @@ require_cmd() {
         echo "Missing required command: $1" >&2
         exit 1
     fi
+}
+
+find_local_esde_apk() {
+    local apk_dir="artifacts/apks"
+    if [ ! -d "$apk_dir" ]; then
+        return 1
+    fi
+
+    local candidate
+    while IFS= read -r candidate; do
+        case "$(basename "$candidate")" in
+            ES-DE*.apk|ES_DE*.apk|es-de*.apk|es_de*.apk|EmulationStation*.apk)
+                echo "$candidate"
+                return 0
+                ;;
+        esac
+    done < <(find "$apk_dir" -maxdepth 1 -type f -name '*.apk' | sort)
+
+    return 1
 }
 
 sync_esde_custom_systems() {
@@ -47,7 +84,7 @@ sync_esde_custom_systems() {
 }
 
 build_remote_payload_args() {
-    local payload=("scripts")
+    local payload=("scripts" "config/droid-config.sh")
 
     if [ -d artifacts/termux ]; then
         payload+=("artifacts/termux")
@@ -143,7 +180,7 @@ if [ "$DRYRUN" -eq 0 ]; then
     while IFS= read -r payload_path; do
         REMOTE_PAYLOAD+=("$payload_path")
     done < <(build_remote_payload_args)
-    tar czf - "${REMOTE_PAYLOAD[@]}" | ssh -p 8022 "$SSH_TARGET" \
+    tar czf - "${REMOTE_PAYLOAD[@]}" | ssh -p "$SSH_PORT" "$SSH_TARGET" \
         "mkdir -p '$REMOTE_WORKDIR' && tar xzf - -C '$REMOTE_WORKDIR' && bash '$REMOTE_WORKDIR/scripts/setup.sh'"
 
     sync_esde_custom_systems
@@ -160,3 +197,11 @@ else
     echo "[*] Installing host-tracked APK artifacts via adb..."
     python3 scripts/bootstrap_apks.py --serial "$ADB_SERIAL"
 fi
+
+echo
+if ! ESDE_APK_PATH="$(find_local_esde_apk)"; then
+    echo "[-] Required ES-DE APK is missing under artifacts/apks/" >&2
+    echo "    Buy ES-DE once from https://es-de.org/ and place the APK in artifacts/apks/ before rerunning setup_droid.sh." >&2
+    exit 1
+fi
+echo "[+] ES-DE APK found: $ESDE_APK_PATH"

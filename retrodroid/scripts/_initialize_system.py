@@ -10,8 +10,8 @@ How to use this script in your Terminal pipeline
 2. Verify files: Look into your internal directory layouts using your computer file manager. You will see your brand
     new RetroGames architecture ready to handle input files.
 3. Test boot parameters: Unplug your Orange Pi 5 completely from the wall outlet and reapply power. The system will
-    cleanly spin up the background terminal listener on Port 8022 without you ever having to manually click an app
-    icon inside Android again.
+    cleanly spin up the background terminal listener on the configured SSH port without you ever having to manually
+    click an app icon inside Android again.
 """
 
 import os
@@ -20,10 +20,13 @@ import subprocess
 import socket
 from pathlib import Path
 
+from droid_config import load_droid_config
+
 # CONFIGURATION ARCHITECTURE
-RETROGAMES_ROOT = "/storage/emulated/0/RetroGames"
+CONFIG = load_droid_config()
+RETROGAMES_ROOT = str(CONFIG.retro_games_dir)
 PLATFORMS = ["nes", "snes", "genesis", "dreamcast", "ps1", "gc", "3ds", "ps2", "n64"]
-RETRODROID_SHELL_ROOT = Path.home() / ".config" / "retrodroid" / "shell"
+RETRODROID_SHELL_ROOT = CONFIG.termux_shell_helper_root
 WATCH_CPU_HELPER = "watch_cpu.bash"
 
 def get_local_ip():
@@ -49,12 +52,10 @@ def setup_directory_tree():
     """Generates the absolute structure required for ROM storage and image staging."""
     print("[*] Instantiating file storage directory backbone...")
 
-    # Subfolder target layout definitions
     subfolders = [
         "roms",
         "bios",
         "installers",
-        "media_staging"
     ]
 
     # Generate foundational folders
@@ -186,7 +187,7 @@ def main():
     print("   Install Termux:Boot, open it once, then create ~/.termux/boot/start-sshd manually.")
     if current_ip:
         print("🌐 Remote Connection Terminal Command Line to copy and run:")
-        print(f"    ssh -p 8022 {username}@{current_ip}")
+        print(f"    ssh -p {CONFIG.ssh_port} {username}@{current_ip}")
     else:
         print("🌐 Remote Connection Terminal Command Line: unavailable until the device has a network IP.")
     print("="*57 + "\n")
