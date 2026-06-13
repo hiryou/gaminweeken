@@ -190,14 +190,15 @@ python3 scripts/build_dawnkaya_variants.py --systems-file tmp/dawnkaya-active-sy
 5. Redeploy theme to Droid:
 
 ```bash
-adb -s 192.168.0.99:5555 push artifacts/themes/dawnkaya/. /sdcard/ES-DE/themes/dawnkaya/
+. config/droid-config.sh
+adb -s "$DROID_ADB_SERIAL" push artifacts/themes/dawnkaya/. /sdcard/ES-DE/themes/dawnkaya/
 ```
 
 6. Restart ES-DE:
 
 ```bash
-adb -s 192.168.0.99:5555 shell am force-stop org.es_de.frontend
-adb -s 192.168.0.99:5555 shell monkey -p org.es_de.frontend -c android.intent.category.LAUNCHER 1
+adb -s "$DROID_ADB_SERIAL" shell am force-stop org.es_de.frontend
+adb -s "$DROID_ADB_SERIAL" shell monkey -p org.es_de.frontend -c android.intent.category.LAUNCHER 1
 ```
 
 ## Access details known-good
@@ -205,15 +206,17 @@ adb -s 192.168.0.99:5555 shell monkey -p org.es_de.frontend -c android.intent.ca
 SSH:
 
 ```bash
-ssh -p 8022 u0_a77@192.168.0.99
+. config/droid-config.sh
+ssh -p "$SSH_PORT" "$DROID_SSH_TARGET"
 ```
 
 ADB:
 
 ```bash
+. config/droid-config.sh
 adb devices
 # expected:
-# 192.168.0.99:5555    device
+# ${DROID_ADB_SERIAL}    device
 ```
 
 ## Constraint to preserve

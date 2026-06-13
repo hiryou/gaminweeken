@@ -25,3 +25,6 @@ __pycache__/
 tmp/
 .venv*
 
+# local retro system
+retrodroid/retrogaming
+

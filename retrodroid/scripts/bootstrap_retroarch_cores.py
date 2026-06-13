@@ -14,11 +14,14 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from droid_config import load_droid_config
+
 
 RETROARCH_PACKAGE = "com.retroarch.aarch64"
-RETROARCH_ROOT = "/sdcard/RetroArch"
-RETROARCH_CORES_DIR = f"{RETROARCH_ROOT}/cores"
-RETROARCH_INFO_DIR = f"{RETROARCH_ROOT}/info"
+CONFIG = load_droid_config()
+RETROARCH_ROOT = str(CONFIG.retroarch_dir)
+RETROARCH_CORES_DIR = str(CONFIG.retroarch_cores_dir)
+RETROARCH_INFO_DIR = str(CONFIG.retroarch_info_dir)
 RETROARCH_ANDROID_CORE_BASE = "https://buildbot.libretro.com/nightly/android/latest/arm64-v8a"
 RETROARCH_INFO_ZIP_URL = "https://buildbot.libretro.com/assets/frontend/info.zip"
 

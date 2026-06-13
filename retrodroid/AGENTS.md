@@ -1,0 +1,1 @@
+- When validating emulator BIOS or firmware files, use https://raw.githubusercontent.com/batocera-linux/batocera.linux/refs/heads/master/package/batocera/core/batocera-scripts/scripts/batocera-systems as the checksum source unless repo-local docs specify otherwise.

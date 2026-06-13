@@ -31,6 +31,11 @@ So:
    ```bash
    ./setup_droid.sh <ssh_target> [adb_serial]
    ```
+   Or source the tracked host/device connection values from `config/droid-config.sh`:
+   ```bash
+   . config/droid-config.sh
+   ./setup_droid.sh "$DROID_SSH_TARGET" "$DROID_ADB_SERIAL"
+   ```
    ES-DE will be detected and installed after the emulator APKs.
 4. Launch ES-DE once so it can create its working folders.
 5. When prompted, point ES-DE at the ROM root:
@@ -92,7 +97,8 @@ RetroArch-backed systems that commonly require them:
 If you have multiple adb devices connected:
 
 ```bash
-./setup_retroarch.sh --serial 192.168.0.99:5555
+. config/droid-config.sh
+./setup_retroarch.sh --serial "$DROID_ADB_SERIAL"
 ```
 
 ## Alternate Emulator Cases
@@ -180,15 +186,3 @@ If you want ES-DE entries for `switch` or `wii`, create those folders manually:
 mkdir -p /storage/emulated/0/RetroGames/roms/switch
 mkdir -p /storage/emulated/0/RetroGames/roms/wii
 ```
-
-## Artwork Paths
-
-ES-DE artwork lands under:
-
-```text
-/storage/emulated/0/ES-DE/downloaded_media/
-```
-
-This repo's art-management helpers are built around that path. See:
-- [README.md](./README.md)
-- [emulators-docs.md](./emulators-docs.md)

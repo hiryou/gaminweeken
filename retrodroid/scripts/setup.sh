@@ -2,8 +2,8 @@
 
 set -eu
 
-WORKDIR="/sdcard/Download/retrodroid"
-SCRIPTS_DIR="$WORKDIR/scripts"
+SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
+WORKDIR="$(cd "$SCRIPTS_DIR/.." && pwd)"
 PREFIX_BIN="${PREFIX:-/data/data/com.termux/files/usr}/bin"
 
 echo "========================================================="
