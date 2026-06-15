@@ -153,3 +153,20 @@ mkdir -p /sdcard/RetroGames/ROMs/wii
 
 Creating these folders under the ES-DE ROM root allows ES-DE to scan and display those games. You still need to
 complete the per-emulator setup process and install any required system files.
+
+## Per-Emulator First Run Notes
+
+### PS3 RPCSX firmware install
+
+![ES-DE initialization of ROMs sub-dirs](static/rpcsx-firmware-install.png)
+
+This could take a long time and may look like getting stuck on the GUI. To ensure, tail the progress
+```shell
+$ adb -s "$DROID_ADB_SERIAL" logcat -v brief | rg --line-buffered '(net\.rpcsx|Firmware Installation|Compiling PPU|Progress: module|Fatal signal|SIG|OOM|Scudo|crash|ANR)'
+
+# If you want only the most relevant progress lines:
+$ adb -s "$DROID_ADB_SERIAL" logcat -v brief | rg --line-buffered 'Progress: module|Firmware Installation|Compiling PPU|OOM|Scudo|Fatal signal'
+```
+
+
+

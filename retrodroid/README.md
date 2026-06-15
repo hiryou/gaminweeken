@@ -2,7 +2,7 @@
 
 >> 🕰️ 1985. A hot afternoon, a 14-inch CRT, a world opening in phosphor glow. 📺🕹️
 >
-> We can't relive those days, but in the nostalgia these games still carry, their joy lingers close.
+> We can't relive those days, but in the nostalgia these games carry, their joy lingers close.
 
 ![Droid app drawer with Taskbar / utility apps](static/home-console.png)
 
@@ -19,7 +19,8 @@ That [rationale](./docs/rationale.md) behind the trade is the point of the proje
 
 ## Quick Setup
 
-The end result runs [Orange Pi OS](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-pi-5.html) 
+The end result runs
+[Orange Pi OS](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-pi-5.html)
 as a console-style retro box with [ES-DE](https://es-de.org/) plus a curated
 Android emulator stack. The point versus Batocera is simple: Batocera is cleaner and more unified, but Droid gets
 better GPU driver support on RK3588, which matters for heavier systems like PS2, 3DS, and Switch.
@@ -47,7 +48,8 @@ python3 -m pip install requests
 If you want a live screen for setup or debugging:
 
 ```bash
-scrcpy
+scrcpy [--no-audio]
+# optional no-audio flag to not take over audio
 ```
 
 ### 3. Review Device Config
@@ -113,7 +115,7 @@ Manual on the Droid.
 
 ```bash
 pkg update && pkg upgrade -y
-pkg install openssh python iproute2 rsync -y
+pkg install openssh python iproute2 rsync htop -y
 passwd
 sshd
 ```
@@ -156,7 +158,7 @@ Scripted on the host.
 If you want to refresh the downloadable emulator APK cache:
 
 ```bash
-./download_apks.sh
+./download_apks.sh [--dryrun]
 ```
 
 If you have a locally obtained ES-DE APK, place it under:
@@ -184,7 +186,8 @@ The main setup script requires this APK and will fail if it is missing.
 Scripted on the host.
 
 ```bash
-./setup_droid.sh "$DROID_SSH_TARGET" "$DROID_ADB_SERIAL"
+./setup_droid.sh [--dryrun]
+./setup_droid.sh
 ```
 
 What this does:
@@ -249,11 +252,18 @@ Manual on the Droid, plus optional host push.
 
 Open `Key Mapper` once and grant the permissions it asks for.
 
-If you keep a Key Mapper backup in:
-
-```text
-artifacts/keymapper/keymapper-backup.zip
-```
+The current Key Mapper backup under `artifacts/keymapper/*.zip` has the following mappings from the 8bitdo pro 2 
+controller:
+- `hotkey` (the little button under West/East/South/North buttons) = go back while playing in any emulator. This brings
+up the emulator's system menu for you to customize things/exit game/etc
+- `Select` + L3 + R3 = take screenshot
+- While in ES-DE, hold `hotkey` + Select = bring up Power menu, then:
+  - L1 to restart
+  - R1 to shutdown
+- `Select` + L1 = - volume
+- `Select` + R1 = + volume
+- `Select` + L2 = - screen brightness
+- `Select` + R2 = + screen brightness
 
 push it from host:
 
@@ -265,12 +275,7 @@ adb -s "$DROID_ADB_SERIAL" push artifacts/keymapper/keymapper-backup.zip /sdcard
 Then import it manually inside `Key Mapper`.
 
 ### 16. Make It Feel Like a Console
-Manual on the Droid, plus optional host commands for maintenance.
-
-Goal:
-- set `ES-DE` as the Android home app
-- keep the third-party desktop taskbar hidden during normal use
-- only bring the taskbar back temporarily when you need maintenance UI
+Manual on the Droid, plus optional host commands for maintenance. 
 
 On the Droid:
 1. Set `ES-DE` as the default home app in Android settings.
@@ -311,3 +316,36 @@ watch_cpu
 
 - PS Vita is not a plain ROM-folder system in the same way NES/SNES are.
   Install Vita games through Vita3K's own supported flow.
+
+## Host Utility
+
+### Group BIOS / Firmware
+
+`scripts/organize_bios_stash.py` is not part of the main setup flow.
+
+It recursively scans a host directory of BIOS / firmware files, matches known files
+against Batocera BIOS definitions, sorts recognized files into per-system folders,
+and moves unmatched files into `_review/`.
+
+This is useful when a user has a messy BIOS stash and wants it accounted into
+systems before copying anything onto the Droid. AI agents working in this repo
+should use this script for that kind of BIOS-organization task.
+
+### Check audio at the droid
+
+```shell
+# shows the current music route and per-device volume indexes
+$ adb -s "$DROID_ADB_SERIAL" shell 'dumpsys audio | sed -n "/STREAM_MUSIC:/,/STREAM_ALARM:/p"'
+
+# check what current output is & volumen
+$ adb -s "$DROID_ADB_SERIAL" shell 'cmd media_session volume --stream 3 --get'
+$ adb -s "$DROID_ADB_SERIAL" shell 'dumpsys audio | grep -A 8 "STREAM_MUSIC:"'
+```
+
+
+
+
+
+
+
+

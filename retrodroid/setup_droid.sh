@@ -21,18 +21,31 @@ SSH_PORT="${SSH_PORT:-8022}"
 DEFAULT_DROID_ADDRESS="${DROID_ADDRESS:-}"
 DEFAULT_SSH_USER="${SSH_USER:-}"
 DEFAULT_ADB_PORT="${ADB_PORT:-5555}"
+DEFAULT_SSH_TARGET="${DROID_SSH_TARGET:-}"
+DEFAULT_ADB_SERIAL="${DROID_ADB_SERIAL:-}"
 DRYRUN=0
 
+if [ -z "$DEFAULT_SSH_TARGET" ] && [ -n "$DEFAULT_SSH_USER" ] && [ -n "$DEFAULT_DROID_ADDRESS" ]; then
+    DEFAULT_SSH_TARGET="${DEFAULT_SSH_USER}@${DEFAULT_DROID_ADDRESS}"
+fi
+
+if [ -z "$DEFAULT_ADB_SERIAL" ] && [ -n "$DEFAULT_DROID_ADDRESS" ]; then
+    DEFAULT_ADB_SERIAL="${DEFAULT_DROID_ADDRESS}:${DEFAULT_ADB_PORT}"
+fi
+
 usage() {
-    echo "Usage: $0 [--dryrun] <ssh_target> [adb_serial]"
+    echo "Usage: $0 [<ssh_target> [adb_serial]]"
     echo "Usage: $0 --dryrun [adb_serial]"
-    if [ -n "$DEFAULT_SSH_USER" ] && [ -n "$DEFAULT_DROID_ADDRESS" ]; then
-        echo "Example: $0 ${DEFAULT_SSH_USER}@${DEFAULT_DROID_ADDRESS}"
-        echo "Example: $0 ${DEFAULT_SSH_USER}@${DEFAULT_DROID_ADDRESS} ${DEFAULT_DROID_ADDRESS}:${DEFAULT_ADB_PORT}"
+    if [ -n "$DEFAULT_SSH_TARGET" ]; then
+        echo "Example: $0"
+        echo "Example: $0 ${DEFAULT_SSH_TARGET}"
+    fi
+    if [ -n "$DEFAULT_SSH_TARGET" ] && [ -n "$DEFAULT_ADB_SERIAL" ]; then
+        echo "Example: $0 ${DEFAULT_SSH_TARGET} ${DEFAULT_ADB_SERIAL}"
     fi
     echo "Example: $0 --dryrun"
-    if [ -n "$DEFAULT_DROID_ADDRESS" ]; then
-        echo "Example: $0 --dryrun ${DEFAULT_DROID_ADDRESS}:${DEFAULT_ADB_PORT}"
+    if [ -n "$DEFAULT_ADB_SERIAL" ]; then
+        echo "Example: $0 --dryrun ${DEFAULT_ADB_SERIAL}"
     fi
 }
 
@@ -142,7 +155,11 @@ if [ "$DRYRUN" -eq 1 ]; then
         exit 1
     fi
 else
-    if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+    if [ $# -gt 2 ]; then
+        usage
+        exit 1
+    fi
+    if [ $# -eq 0 ] && [ -z "$DEFAULT_SSH_TARGET" ]; then
         usage
         exit 1
     fi
@@ -156,11 +173,11 @@ if [ "$DRYRUN" -eq 0 ]; then
     require_cmd tar
 fi
 
-SSH_TARGET="${1:-}"
 if [ "$DRYRUN" -eq 1 ]; then
-    ADB_SERIAL="$(resolve_adb_serial "${1:-}")"
+    ADB_SERIAL="$(resolve_adb_serial "${1:-$DEFAULT_ADB_SERIAL}")"
 else
-    ADB_SERIAL="$(resolve_adb_serial "${2:-}")"
+    SSH_TARGET="${1:-$DEFAULT_SSH_TARGET}"
+    ADB_SERIAL="$(resolve_adb_serial "${2:-$DEFAULT_ADB_SERIAL}")"
 fi
 
 echo "========================================================="

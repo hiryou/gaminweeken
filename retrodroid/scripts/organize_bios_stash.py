@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+Recursively sort a host BIOS/firmware stash into per-system folders using
+Batocera BIOS hash definitions. Unmatched files are moved into `_review/`
+and a JSON report is written under `tmp/`.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -15,7 +21,7 @@ from pathlib import Path
 
 
 BATOCERA_RAW_URL = (
-    "https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/"
+    "https://raw.githubusercontent.com/batocera-linux/batocera.linux/refs/heads/master/"
     "package/batocera/core/batocera-scripts/scripts/batocera-systems"
 )
 
@@ -188,7 +194,11 @@ def move_file(src: Path, dest: Path) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Organize BIOS stash by platform using Batocera hash definitions")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Recursively organize a BIOS stash by platform using Batocera hash definitions."
+        )
+    )
     parser.add_argument("root", type=Path, nargs="?", default=Path.home() / "Downloads/retrogaming/bios")
     parser.add_argument("--report", type=Path, default=Path("tmp/bios_organize_report.json"))
     args = parser.parse_args()

@@ -83,6 +83,27 @@ EMULATOR_REGISTRY = {
         "emulator": "dolphin",
         "manifest_name": "dolphin.json",
     },
+    "psp_ppsspp": {
+        "name": "PPSSPP PSP Stable Release",
+        "source_type": "resolver",
+        "resolver": "resolve_ppsspp",
+        "emulator": "ppsspp",
+        "manifest_name": "ppsspp.json",
+    },
+    "ps3_aps3e": {
+        "name": "aPS3e PS3 Experimental Android Release",
+        "source_type": "resolver",
+        "resolver": "resolve_aps3e",
+        "emulator": "aps3e",
+        "manifest_name": "aps3e.json",
+    },
+    "ps3_rpcsx": {
+        "name": "RPCSX Android Release",
+        "source_type": "resolver",
+        "resolver": "resolve_rpcsx",
+        "emulator": "rpcsx",
+        "manifest_name": "rpcsx.json",
+    },
     "n64_mupen64plus_ae": {
         "name": "Mupen64Plus AE (official nightly bundle)",
         "source_type": "resolver",
@@ -223,6 +244,35 @@ def resolve_dolphin() -> DownloadSpec:
     )
 
 
+# Docs ref for pinned stable Android release:
+# https://www.ppsspp.org/download/
+def resolve_ppsspp() -> DownloadSpec:
+    return DownloadSpec(
+        url="https://www.ppsspp.org/files/1_20_4/ppsspp.apk",
+        filename="ppsspp.apk",
+    )
+
+
+# Docs ref for pinned Android release page:
+# https://github.com/aenu1/aps3e/releases
+# alternative: https://github.com/RPCSX/rpcsx-ui-android
+# note that the ancestor of RPCSX - RPCS3 is deprecated https://github.com/RPCS3-Android/rpcs3-android/releases
+def resolve_aps3e() -> DownloadSpec:
+    return DownloadSpec(
+        url="https://github.com/aenu1/aps3e/releases/download/2.39/2.39.apk",
+        filename="aPS3e-2.39.apk",
+    )
+
+
+# Docs ref for pinned Android release page:
+# https://github.com/RPCSX/rpcsx-ui-android/releases
+def resolve_rpcsx() -> DownloadSpec:
+    return DownloadSpec(
+        url="https://github.com/RPCSX/rpcsx-ui-android/releases/download/v20250425/rpcsx-release.apk",
+        filename="rpcsx-release.apk",
+    )
+
+
 def resolve_mupen64plus_ae() -> DownloadSpec:
     return DownloadSpec(
         url=(
@@ -247,6 +297,22 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: apk_file.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def load_cached_manifest_filename(download_dir: Path, config: dict) -> str | None:
+    manifest_path = download_dir / config["manifest_name"]
+    if not manifest_path.is_file():
+        return None
+
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Unable to read cached manifest {manifest_path.name}: {exc}") from exc
+
+    filename = manifest.get("filename")
+    if not isinstance(filename, str) or not filename:
+        raise RuntimeError(f"Cached manifest {manifest_path.name} is missing a valid filename field")
+    return filename
 
 
 def write_manifest(download_dir: Path, config: dict, spec: DownloadSpec) -> None:
@@ -337,6 +403,7 @@ def main() -> None:
     download_dir = Path(args.download_dir)
     download_dir.mkdir(parents=True, exist_ok=True)
     downloaded: list[str] = []
+    cached: list[str] = []
     manual_warnings: list[tuple[str, str]] = []
     failures: list[tuple[str, str]] = []
 
@@ -357,8 +424,20 @@ def main() -> None:
             print("-" * 50)
             continue
 
-        resolver = globals()[config["resolver"]]
         try:
+            cached_filename = load_cached_manifest_filename(download_dir, config)
+            if cached_filename:
+                cached_path = download_dir / cached_filename
+                if cached_path.is_file():
+                    cached.append(cached_filename)
+                    if args.dry_run or args.dryrun:
+                        print(f"[=] APK already downloaded: {cached_filename}")
+                    else:
+                        print(f"[=] Skipping existing APK: {cached_filename}")
+                    print("-" * 50)
+                    continue
+
+            resolver = globals()[config["resolver"]]
             spec = resolver()
             if args.dry_run or args.dryrun:
                 print(f"[+] Resolved Download: {spec.filename}")
@@ -378,6 +457,10 @@ def main() -> None:
     print("\n============================= SUMMARY =============================")
     print(f"[+] Downloaded APKs: {len(downloaded)}")
     for filename in downloaded:
+        print(f"    - {filename}")
+
+    print(f"[=] Cached APKs reused: {len(cached)}")
+    for filename in cached:
         print(f"    - {filename}")
 
     if manual_warnings:

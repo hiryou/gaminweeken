@@ -80,6 +80,21 @@ APK_INSTALL_RULES = [
         "grep_tokens": ("dolphin",),
     },
     {
+        "match_prefixes": ("ppsspp",),
+        "emulator": "ppsspp",
+        "grep_tokens": ("ppsspp",),
+    },
+    {
+        "match_prefixes": ("aPS3e-", "aps3e-"),
+        "emulator": "aps3e",
+        "grep_tokens": ("aps3e",),
+    },
+    {
+        "match_prefixes": ("rpcsx-release", "RPCSX", "rpcsx"),
+        "emulator": "rpcsx",
+        "grep_tokens": ("rpcsx",),
+    },
+    {
         "match_prefixes": ("duckstation", "DuckStation"),
         "emulator": "duckstation",
         "grep_tokens": ("duckstation",),
@@ -462,7 +477,7 @@ def main() -> int:
 
         if args.dryrun:
             planned.append(manifest.filename)
-            print(f"[*] Would install {manifest.filename}...")
+            print(f"[+] Would install {manifest.filename}...")
             continue
 
         print(f"[*] Installing {manifest.filename}...")
@@ -500,7 +515,7 @@ def main() -> int:
 
         if args.dryrun:
             planned.append(optional_apk.apk_path.name)
-            print(f"[*] Would install {optional_apk.apk_path.name}...")
+            print(f"[+] Would install {optional_apk.apk_path.name}...")
             continue
 
         print(f"[*] Installing {optional_apk.apk_path.name}...")
