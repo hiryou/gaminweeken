@@ -160,7 +160,7 @@ complete the per-emulator setup process and install any required system files.
 
 ![ES-DE initialization of ROMs sub-dirs](static/rpcsx-firmware-install.png)
 
-This could take a long time and may look like getting stuck on the GUI. To ensure, tail the progress
+This could take a long time and may look like getting stuck on the GUI. Tail the progress:
 ```shell
 $ adb -s "$DROID_ADB_SERIAL" logcat -v brief | rg --line-buffered '(net\.rpcsx|Firmware Installation|Compiling PPU|Progress: module|Fatal signal|SIG|OOM|Scudo|crash|ANR)'
 

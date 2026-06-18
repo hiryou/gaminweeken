@@ -28,3 +28,12 @@ tmp/
 # local retro system
 retrodroid/retrogaming
 
+# custom nested java app built on gradle
+**/.gradle/
+**/app/build/
+**/local.properties
+
+
+
+
+

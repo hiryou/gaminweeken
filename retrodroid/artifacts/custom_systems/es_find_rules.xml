@@ -78,12 +78,18 @@
 			<entry>xyz.aethersx2.tturnip/xyz.aethersx2.android.EmulationActivity</entry>
 		</rule>
 	</emulator>
-	<emulator name="NETHERSX2-TURNIP-CLASSIC">
-		<!-- Sony PlayStation 2 emulator NetherSX2-Turnip -->
-		<rule type="androidpackage">
-			<entry>xyz.aethersx2.cturnip/xyz.aethersx2.android.EmulationActivity</entry>
-		</rule>
-	</emulator>
+    <emulator name="NETHERSX2-TURNIP-CLASSIC">
+        <!-- Sony PlayStation 2 emulator NetherSX2-Turnip -->
+        <rule type="androidpackage">
+            <entry>xyz.aethersx2.cturnip/xyz.aethersx2.android.EmulationActivity</entry>
+        </rule>
+    </emulator>
+    <emulator name="RPCSX">
+        <!-- Sony PlayStation 3 emulator RPCSX -->
+        <rule type="androidpackage">
+            <entry>net.rpcsx/net.rpcsx.MainActivity</entry>
+        </rule>
+    </emulator>
     <emulator name="NYUSHU">
         <!-- Nintendo Switch emulator Nyushu -->
         <rule type="androidpackage">
