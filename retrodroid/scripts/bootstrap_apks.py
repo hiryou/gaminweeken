@@ -17,10 +17,17 @@ from pathlib import Path
 
 DEFAULT_MANIFEST_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "apks"
 DEFAULT_DOWNLOAD_DIR = DEFAULT_MANIFEST_DIR
+DEFAULT_CUSTOM_APK_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "myapks"
 OPTIONAL_LOCAL_APK_RULES = [
     {
         "match_prefixes": ("ES-DE", "ES_DE", "es-de", "es_de", "EmulationStation"),
         "emulator": "esde",
+        "allow_reinstall": False,
+    },
+    {
+        "match_prefixes": ("emulator-bridge", "Emulator-Bridge", "EmulatorBridge"),
+        "emulator": "emulator-bridge",
+        "allow_reinstall": True,
     },
 ]
 APK_INSTALL_RULES = [
@@ -126,6 +133,7 @@ class ApkManifest:
 class OptionalLocalApk:
     emulator: str
     apk_path: Path
+    allow_reinstall: bool
 
 
 def require_adb() -> None:
@@ -331,24 +339,28 @@ def install_apkm(serial: str, apkm_path: Path) -> tuple[bool, str]:
         return False, details
 
 
-def resolve_optional_local_apks(download_dir: Path, manifests: list[ApkManifest]) -> list[OptionalLocalApk]:
+def resolve_optional_local_apks(search_dirs: list[Path], manifests: list[ApkManifest]) -> list[OptionalLocalApk]:
     manifest_filenames = {manifest.filename for manifest in manifests}
     optional_apks: list[OptionalLocalApk] = []
 
-    for apk_path in sorted(download_dir.glob("*.apk")):
-        if apk_path.name in manifest_filenames:
+    for search_dir in search_dirs:
+        if not search_dir.exists():
             continue
-        normalized_name = apk_path.name.lower()
-        for rule in OPTIONAL_LOCAL_APK_RULES:
-            prefixes = rule["match_prefixes"]
-            if any(normalized_name.startswith(prefix.lower()) for prefix in prefixes):
-                optional_apks.append(
-                    OptionalLocalApk(
-                        emulator=str(rule["emulator"]),
-                        apk_path=apk_path,
+        for apk_path in sorted(search_dir.glob("*.apk")):
+            if apk_path.name in manifest_filenames:
+                continue
+            normalized_name = apk_path.name.lower()
+            for rule in OPTIONAL_LOCAL_APK_RULES:
+                prefixes = rule["match_prefixes"]
+                if any(normalized_name.startswith(prefix.lower()) for prefix in prefixes):
+                    optional_apks.append(
+                        OptionalLocalApk(
+                            emulator=str(rule["emulator"]),
+                            apk_path=apk_path,
+                            allow_reinstall=bool(rule.get("allow_reinstall", False)),
+                        )
                     )
-                )
-                break
+                    break
 
     return optional_apks
 
@@ -402,6 +414,11 @@ def parse_args() -> argparse.Namespace:
         help=f"Directory containing downloaded APK payloads (default: {DEFAULT_DOWNLOAD_DIR})",
     )
     parser.add_argument(
+        "--custom-apk-dir",
+        default=str(DEFAULT_CUSTOM_APK_DIR),
+        help=f"Directory containing manually built APK payloads to install after emulators (default: {DEFAULT_CUSTOM_APK_DIR})",
+    )
+    parser.add_argument(
         "--serial",
         help="adb device serial. If omitted, bootstrap_apks.py will use the only connected device.",
     )
@@ -421,6 +438,8 @@ def main() -> int:
     manifest_dir.mkdir(parents=True, exist_ok=True)
     download_dir = Path(args.download_dir)
     download_dir.mkdir(parents=True, exist_ok=True)
+    custom_apk_dir = Path(args.custom_apk_dir)
+    custom_apk_dir.mkdir(parents=True, exist_ok=True)
     manifests = resolve_manifests(manifest_dir)
     if not manifests:
         print(f"[-] No APK manifest files found under {manifest_dir}")
@@ -428,7 +447,7 @@ def main() -> int:
 
     serial = resolve_serial(args.serial)
     installed_packages = list_installed_packages(serial)
-    optional_local_apks = resolve_optional_local_apks(download_dir, manifests)
+    optional_local_apks = resolve_optional_local_apks([download_dir, custom_apk_dir], manifests)
 
     print("=========================================================")
     print("      RETRODROID HOST INSTALLER: APK BOOTSTRAP PIPELINE  ")
@@ -437,6 +456,8 @@ def main() -> int:
     print(f"[*] local manifest directory: {manifest_dir}")
     print(f"[*] local APK payload directory: {download_dir}\n")
     if optional_local_apks:
+        print(f"[*] local custom APK directory: {custom_apk_dir}")
+        print()
         print("[*] Optional local APKs detected for install-after-emulators:")
         for apk in optional_local_apks:
             print(f"    - {apk.apk_path.name}")
@@ -504,6 +525,29 @@ def main() -> int:
             installed_packages,
         )
         if existing_packages:
+            if optional_apk.allow_reinstall:
+                if args.dryrun:
+                    planned.append(optional_apk.apk_path.name)
+                    print(
+                        f"[+] Would reinstall {optional_apk.apk_path.name} over existing package(s): "
+                        f"{', '.join(existing_packages)}"
+                    )
+                    continue
+
+                print(
+                    f"[*] Reinstalling {optional_apk.apk_path.name} over existing package(s): "
+                    f"{', '.join(existing_packages)}..."
+                )
+                ok, details = install_apk(serial, optional_apk.apk_path)
+                if ok:
+                    installed.append(optional_apk.apk_path.name)
+                    print(f"    [+] Reinstalled: {optional_apk.apk_path.name}")
+                else:
+                    failed.append((optional_apk.apk_path.name, details))
+                    print(f"    [-] Reinstall failed: {optional_apk.apk_path.name}")
+                    print(f"        {details}")
+                continue
+
             details = (
                 f"emulator `{emulator}` already has installed package(s): "
                 f"{', '.join(existing_packages)}. Uninstall the old emulator manually before installing {optional_apk.apk_path.name}."

@@ -59,6 +59,12 @@
             <entry>com.sbro.emucorev/com.sbro.emucorev.core.vita.Emulator</entry>
         </rule>
     </emulator>
+    <emulator name="BRIDGE">
+        <!-- Generic emulator bridge app -->
+        <rule type="androidpackage">
+            <entry>io.retrodroid.emulatorbridge/.MainActivity</entry>
+        </rule>
+    </emulator>
 	<emulator name="EMUCOREX">
         <!-- Sony PlayStation 2 emulator EmuCoreX -->
         <rule type="androidpackage">

@@ -94,7 +94,11 @@ Lastly, build the .apk
 $ ./gradlew assembleDebug
 ```
 
-
+After droid_setup i.e. installation of all apks, check if this app was installed:
+```shell
+$ adb -s "$DROID_ADB_SERIAL" shell pm list packages | grep io.retrodroid.emulatorbridge
+package:io.retrodroid.emulatorbridge
+```
 
 
 
