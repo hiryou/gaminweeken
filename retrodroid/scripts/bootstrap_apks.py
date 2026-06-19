@@ -24,11 +24,6 @@ OPTIONAL_LOCAL_APK_RULES = [
         "emulator": "esde",
         "allow_reinstall": False,
     },
-    {
-        "match_prefixes": ("emulator-bridge", "Emulator-Bridge", "EmulatorBridge"),
-        "emulator": "emulator-bridge",
-        "allow_reinstall": True,
-    },
 ]
 APK_INSTALL_RULES = [
     {
@@ -90,16 +85,6 @@ APK_INSTALL_RULES = [
         "match_prefixes": ("ppsspp",),
         "emulator": "ppsspp",
         "grep_tokens": ("ppsspp",),
-    },
-    {
-        "match_prefixes": ("aPS3e-", "aps3e-"),
-        "emulator": "aps3e",
-        "grep_tokens": ("aps3e",),
-    },
-    {
-        "match_prefixes": ("rpcsx-release", "RPCSX", "rpcsx"),
-        "emulator": "rpcsx",
-        "grep_tokens": ("rpcsx",),
     },
     {
         "match_prefixes": ("duckstation", "DuckStation"),

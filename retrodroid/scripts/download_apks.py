@@ -90,20 +90,6 @@ EMULATOR_REGISTRY = {
         "emulator": "ppsspp",
         "manifest_name": "ppsspp.json",
     },
-    "ps3_aps3e": {
-        "name": "aPS3e PS3 Experimental Android Release",
-        "source_type": "resolver",
-        "resolver": "resolve_aps3e",
-        "emulator": "aps3e",
-        "manifest_name": "aps3e.json",
-    },
-    "ps3_rpcsx": {
-        "name": "RPCSX Android Release",
-        "source_type": "resolver",
-        "resolver": "resolve_rpcsx",
-        "emulator": "rpcsx",
-        "manifest_name": "rpcsx.json",
-    },
     "n64_mupen64plus_ae": {
         "name": "Mupen64Plus AE (official nightly bundle)",
         "source_type": "resolver",
@@ -251,27 +237,6 @@ def resolve_ppsspp() -> DownloadSpec:
         url="https://www.ppsspp.org/files/1_20_4/ppsspp.apk",
         filename="ppsspp.apk",
     )
-
-
-# Docs ref for pinned Android release page:
-# https://github.com/aenu1/aps3e/releases
-# alternative: https://github.com/RPCSX/rpcsx-ui-android
-# note that the ancestor of RPCSX - RPCS3 is deprecated https://github.com/RPCS3-Android/rpcs3-android/releases
-def resolve_aps3e() -> DownloadSpec:
-    return DownloadSpec(
-        url="https://github.com/aenu1/aps3e/releases/download/2.39/2.39.apk",
-        filename="aPS3e-2.39.apk",
-    )
-
-
-# Docs ref for pinned Android release page:
-# https://github.com/RPCSX/rpcsx-ui-android/releases
-def resolve_rpcsx() -> DownloadSpec:
-    return DownloadSpec(
-        url="https://github.com/RPCSX/rpcsx-ui-android/releases/download/v20250425/rpcsx-release.apk",
-        filename="rpcsx-release.apk",
-    )
-
 
 def resolve_mupen64plus_ae() -> DownloadSpec:
     return DownloadSpec(

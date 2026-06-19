@@ -65,15 +65,6 @@ CORE_REGISTRY = {
         library_name="genesis_plus_gx_libretro_android.so",
         info_name="genesis_plus_gx_libretro.info",
     ),
-    "ps1_swanstation": CoreSpec(
-        key="ps1_swanstation",
-        display_name="Sony PlayStation - SwanStation",
-        esde_system="ps1",
-        esde_mapping="RetroArch::SwanStation",
-        archive_name="swanstation_libretro_android.so.zip",
-        library_name="swanstation_libretro_android.so",
-        info_name="swanstation_libretro.info",
-    ),
     "dreamcast_flycast": CoreSpec(
         key="dreamcast_flycast",
         display_name="Sega Dreamcast - Flycast",
@@ -89,7 +80,6 @@ DEFAULT_CORE_KEYS = [
     "nes_fceumm",
     "snes_snes9x",
     "genesis_genesis_plus_gx",
-    "ps1_swanstation",
     "dreamcast_flycast",
 ]
 

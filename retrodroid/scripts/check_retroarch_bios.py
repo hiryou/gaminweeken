@@ -46,37 +46,6 @@ class SystemRule:
 
 
 FIRMWARE_GROUPS = {
-    "ps1_swanstation": {
-        "display_name": "Sony PlayStation - SwanStation",
-        "esde_system": "ps1",
-        "esde_mapping": "RetroArch::SwanStation",
-        "hash_source": (
-            "Batocera batocera-systems PSX biosFiles MD5 list "
-            "(package/batocera/core/batocera-scripts/scripts/batocera-systems)."
-        ),
-        "firmware": [
-            FirmwareSpec("scph5501.bin", True, "PS1 US BIOS", expected_md5=("490f666e1afb15b7362b406ed1cea246",)),
-            FirmwareSpec("scph5500.bin", False, "PS1 JP BIOS", expected_md5=("8dd7d5296a650fac7319bce665a6a53c",)),
-            FirmwareSpec("scph5502.bin", False, "PS1 EU BIOS", expected_md5=("32736f17079d0b2b7024407c39bd3050",)),
-            FirmwareSpec(
-                "PSXONPSP660.bin",
-                False,
-                "Region-free PSP PS1 BIOS alternative",
-                alternates=("psxonpsp660.bin",),
-                expected_md5=("c53ca5908936d412331790f4426c6c33",),
-            ),
-            FirmwareSpec("scph101.bin", False, "PS1 NA BIOS alternative", expected_md5=("6e3735ff4c7dc899ee98981385f6f3d0",)),
-            FirmwareSpec("scph1001.bin", False, "PS1 NA BIOS alternative", expected_md5=("dc2b9bf8da62ec93e868cfd29f0d067d",)),
-            FirmwareSpec("scph7001.bin", False, "PS1 US BIOS alternative", expected_md5=("1e68c231d0896b7eadcad1d7d8e76129",)),
-            FirmwareSpec("ps1_rom.bin", False, "Region-free PS3 PS1 BIOS alternative"),
-            FirmwareSpec("openbios.bin", False, "Open-source BIOS alternative"),
-        ],
-        "notes": (
-            "SwanStation generally needs a PS1 BIOS for broad compatibility. "
-            "At minimum, add scph5501.bin for US-region titles. "
-            "Known-good MD5s are checked against Batocera's PSX BIOS table where available."
-        ),
-    },
     "dreamcast_flycast": {
         "display_name": "Sega Dreamcast - Flycast",
         "esde_system": "dreamcast",
@@ -112,16 +81,6 @@ SYSTEM_RULES: dict[str, SystemRule] = {
         kind="check",
         firmware_group="dreamcast_flycast",
         description="RetroArch::Flycast firmware can be validated automatically.",
-    ),
-    "ps1": SystemRule(
-        kind="check",
-        firmware_group="ps1_swanstation",
-        description="RetroArch::SwanStation firmware can be validated automatically.",
-    ),
-    "psx": SystemRule(
-        kind="check",
-        firmware_group="ps1_swanstation",
-        description="RetroArch::SwanStation firmware can be validated automatically.",
     ),
     "nes": SystemRule(kind="no_firmware_needed", description="RetroArch NES cores do not need a BIOS."),
     "famicom": SystemRule(kind="no_firmware_needed", description="RetroArch NES/Famicom cores do not need a BIOS."),
@@ -252,14 +211,7 @@ def apply_batocera_md5_reference() -> None:
     if systems is None:
         return
 
-    ps1 = FIRMWARE_GROUPS["ps1_swanstation"]
     dreamcast = FIRMWARE_GROUPS["dreamcast_flycast"]
-
-    for item in ps1["firmware"]:
-        filenames = [item.path, *item.alternates]
-        md5s = lookup_batocera_md5s(systems, "psx", *filenames)
-        if md5s:
-            item.expected_md5 = md5s
 
     for item in dreamcast["firmware"]:
         filenames = [item.path, *item.alternates]
@@ -267,7 +219,6 @@ def apply_batocera_md5_reference() -> None:
         if md5s:
             item.expected_md5 = md5s
 
-    ps1["hash_source"] = f"{source_label} Batocera PSX biosFiles MD5 list."
     dreamcast["hash_source"] = (
         f"{source_label} Batocera Dreamcast biosFiles MD5 list for dc_boot.bin; "
         "dc_flash.bin remains presence-only because Batocera does not define an MD5 for it there."

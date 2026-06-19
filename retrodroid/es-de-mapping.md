@@ -55,7 +55,7 @@ Use these default mappings in ES-DE.
 | `snes` | `/sdcard/RetroGames/ROMs/snes/` | `RetroArch` | Use the default ES-DE RetroArch path. |
 | `genesis` | `/sdcard/RetroGames/ROMs/genesis/` | `RetroArch` | Use the default ES-DE RetroArch path. |
 | `dreamcast` | `/sdcard/RetroGames/ROMs/dreamcast/` | `RetroArch` | Use the default ES-DE RetroArch path. |
-| `ps1` | `/sdcard/RetroGames/ROMs/ps1/` | `RetroArch` / `DuckStation (Standalone)` | Use the default ES-DE RetroArch path, or switch to DuckStation if preferred. |
+| `ps1` | `/sdcard/RetroGames/ROMs/ps1/` | `DuckStation (Standalone)` | Use DuckStation as the maintained PlayStation 1 path. |
 | `n64` | `/sdcard/RetroGames/ROMs/n64/` | `Mupen64Plus AE (Standalone)` | Preferred over a RetroArch N64 core. |
 | `gc` | `/sdcard/RetroGames/ROMs/gc/` | `Dolphin (Standalone)` | Preferred for GameCube. |
 | `wii` | `/sdcard/RetroGames/ROMs/wii/` | `Dolphin (Standalone)` | Create this folder manually if you want Wii titles. |
@@ -77,7 +77,6 @@ Recommended starting point:
 | `nes` | `RetroArch::FCEUmm` | `fceumm_libretro_android.so` must be installed | |
 | `snes` | `RetroArch::Snes9x` | `snes9x_libretro_android.so` must be installed | |
 | `genesis` | `RetroArch::Genesis Plus GX` | `genesis_plus_gx_libretro_android.so` must be installed | |
-| `ps1` | `RetroArch::SwanStation` | `swanstation_libretro_android.so` must be installed | [DuckStation (Standalone)](https://www.apkmirror.com/apk/stenzek/duckstation/) |
 | `dreamcast` | `RetroArch::Flycast` | `flycast_libretro_android.so` must be installed | |
 
 This repo now includes a host script to install that baseline RetroArch core set:
@@ -86,8 +85,20 @@ This repo now includes a host script to install that baseline RetroArch core set
 ./setup_retroarch.sh
 ```
 This installs the core `.so` and `.info` files into RetroArch's shared writable storage.
-After running it, open RetroArch once and use `Load Core` for each system you plan to launch
-from ES-DE.
+
+Important Android nuance:
+
+- the files copied by `./setup_retroarch.sh` land under `/sdcard/RetroArch/cores/` and `/sdcard/RetroArch/info/`
+- those shared-storage copies are useful as staging / reinstall sources
+- on this Android build, RetroArch's live runtime core loading still comes from its private app directory under `/data/user/0/com.retroarch.aarch64/cores/`
+- ES-DE RetroArch launch commands are wired to that private runtime core path, not to `/sdcard/RetroArch/cores/`
+
+So the shared-storage core copy by itself is not always enough to fix or replace the live runtime core. If you want RetroArch to actually use the repo-provided core binary, open RetroArch and reinstall / import that core from the GUI so RetroArch refreshes its private runtime copy.
+
+After running `./setup_retroarch.sh`, open RetroArch once and:
+
+- use `Load Core` for each system you plan to launch from ES-DE
+- if a core is broken or you want to force RetroArch to use the repo-provided `.so`, use the RetroArch GUI to reinstall / import it from `/sdcard/RetroArch/cores/`
 
 A separate host-side script checks the BIOS / firmware files still needed by the
 RetroArch-backed systems that commonly require them:
@@ -133,7 +144,6 @@ that starts the target emulator app for the relevant games.
 For the current RetroArch core set:
 
 - `nes` / `snes` / `genesis` do not need BIOS files for the chosen cores
-- `ps1` with `SwanStation` should have a PS1 BIOS under `/sdcard/RetroArch/system/`
 - `dreamcast` with `Flycast` should have `dc_boot.bin` and `dc_flash.bin` under `/sdcard/RetroArch/system/`
 
 Use the host-side checker to validate what is missing:
@@ -167,6 +177,4 @@ $ adb -s "$DROID_ADB_SERIAL" logcat -v brief | rg --line-buffered '(net\.rpcsx|F
 # If you want only the most relevant progress lines:
 $ adb -s "$DROID_ADB_SERIAL" logcat -v brief | rg --line-buffered 'Progress: module|Firmware Installation|Compiling PPU|OOM|Scudo|Fatal signal'
 ```
-
-
 
