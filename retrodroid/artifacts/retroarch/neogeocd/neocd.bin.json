@@ -1,0 +1,7 @@
+{
+  "filename": "neocd.bin",
+  "system": "neogeocd",
+  "target_path": "system/neocd/neocd.bin",
+  "md5": "f39572af7584cb5b3f70ae8cc848aba2",
+  "notes": "Neo Geo CD BIOS for RetroArch NeoCD core."
+}

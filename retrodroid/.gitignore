@@ -1,0 +1,4 @@
+# Some system-required BIOS / launcher files under repo-local RetroArch artifacts
+artifacts/retroarch/**/*.bin
+artifacts/retroarch/**/*.cue
+!artifacts/retroarch/**/*.json

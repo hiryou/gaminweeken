@@ -22,8 +22,12 @@ CONFIG = load_droid_config()
 RETROARCH_ROOT = str(CONFIG.retroarch_dir)
 RETROARCH_CORES_DIR = str(CONFIG.retroarch_cores_dir)
 RETROARCH_INFO_DIR = str(CONFIG.retroarch_info_dir)
+RETROARCH_APP_FILES_DIR = f"/storage/emulated/0/Android/data/{RETROARCH_PACKAGE}/files"
+RETROARCH_APP_SYSTEM_DIR = f"{RETROARCH_APP_FILES_DIR}/system"
+RETROARCH_APP_NEOCD_SYSTEM_DIR = f"{RETROARCH_APP_SYSTEM_DIR}/neocd"
 RETROARCH_ANDROID_CORE_BASE = "https://buildbot.libretro.com/nightly/android/latest/arm64-v8a"
 RETROARCH_INFO_ZIP_URL = "https://buildbot.libretro.com/assets/frontend/info.zip"
+RETROARCH_ARTIFACTS_ROOT = Path(__file__).resolve().parents[1] / "artifacts" / "retroarch"
 
 
 @dataclass(frozen=True)
@@ -82,6 +86,14 @@ DEFAULT_CORE_KEYS = [
     "genesis_genesis_plus_gx",
     "dreamcast_flycast",
 ]
+
+RETROARCH_RUNTIME_SYSTEM_FILES: tuple[tuple[Path, str, str], ...] = (
+    (
+        RETROARCH_ARTIFACTS_ROOT / "neogeocd" / "neocd.bin",
+        f"{RETROARCH_APP_NEOCD_SYSTEM_DIR}/neocd.bin",
+        "Neo Geo CD BIOS",
+    ),
+)
 
 
 def run_command(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -150,6 +162,8 @@ def ensure_remote_directories(serial: str) -> None:
             RETROARCH_ROOT,
             RETROARCH_CORES_DIR,
             RETROARCH_INFO_DIR,
+            RETROARCH_APP_SYSTEM_DIR,
+            RETROARCH_APP_NEOCD_SYSTEM_DIR,
         ]
     )
 
@@ -167,6 +181,24 @@ def extract_zip_member(zip_path: Path, member_name: str, dest_path: Path) -> Non
 
 def push_file(serial: str, local_path: Path, remote_path: str) -> None:
     run_command(["adb", "-s", serial, "push", str(local_path), remote_path])
+
+
+def seed_runtime_system_files(serial: str) -> tuple[list[str], list[str], list[tuple[str, str]]]:
+    installed: list[str] = []
+    skipped: list[str] = []
+    failed: list[tuple[str, str]] = []
+
+    for local_path, remote_path, label in RETROARCH_RUNTIME_SYSTEM_FILES:
+        if not local_path.exists():
+            skipped.append(f"{label} (missing host file: {local_path})")
+            continue
+        try:
+            push_file(serial, local_path, remote_path)
+            installed.append(f"{label} -> {remote_path}")
+        except Exception as exc:
+            failed.append((label, str(exc)))
+
+    return installed, skipped, failed
 
 
 def parse_args() -> argparse.Namespace:
@@ -213,6 +245,9 @@ def main() -> int:
     installed: list[str] = []
     skipped: list[str] = []
     failed: list[tuple[str, str]] = []
+    runtime_installed: list[str] = []
+    runtime_skipped: list[str] = []
+    runtime_failed: list[tuple[str, str]] = []
 
     with tempfile.TemporaryDirectory(prefix="retrodroid-retroarch-") as temp_dir_name:
         temp_dir = Path(temp_dir_name)
@@ -265,6 +300,16 @@ def main() -> int:
                 failed.append((spec.display_name, str(exc)))
                 print(f"    [-] Failed: {exc}")
 
+        if not args.dryrun:
+            print("\n[*] Seeding RetroArch runtime system files...")
+            runtime_installed, runtime_skipped, runtime_failed = seed_runtime_system_files(serial)
+            for item in runtime_installed:
+                print(f"    [+] Installed: {item}")
+            for item in runtime_skipped:
+                print(f"    [!] Skipped: {item}")
+            for name, reason in runtime_failed:
+                print(f"    [-] Failed: {name}: {reason}")
+
     print("\n============================= SUMMARY =============================")
     print(f"[+] RetroArch core targets processed: {len(selected_specs)}")
     print(f"[+] RetroArch core installs completed: {len(installed)}")
@@ -279,6 +324,12 @@ def main() -> int:
     if failed:
         print(f"\n[-] RetroArch core installs failed: {len(failed)}")
         for name, reason in failed:
+            print(f"    - {name}: {reason}")
+        return 1
+
+    if not args.dryrun and runtime_failed:
+        print(f"\n[-] RetroArch runtime system file installs failed: {len(runtime_failed)}")
+        for name, reason in runtime_failed:
             print(f"    - {name}: {reason}")
         return 1
 

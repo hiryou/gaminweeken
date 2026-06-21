@@ -223,7 +223,8 @@ Scripted on the host, then manual in RetroArch.
 Install the shared core files:
 
 ```bash
-./setup_retroarch.sh --serial "$DROID_ADB_SERIAL"
+./setup_retroarch.sh --dryrun
+./setup_retroarch.sh
 ```
 
 Then open `RetroArch` manually and use `Load Core` once for each core you plan to launch from ES-DE.
