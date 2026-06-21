@@ -1,0 +1,7 @@
+{
+  "emulator": "vita3k",
+  "filename": "vita3k-android-latest.apk",
+  "source_url": "https://github.com/Vita3K/Vita3K/releases/download/continuous/android-latest.apk",
+  "sha256": "9a047b21e22255d6c22f6692d9ad454908861105b5e99d2a340f260f2f3c253b",
+  "size": 28131216
+}

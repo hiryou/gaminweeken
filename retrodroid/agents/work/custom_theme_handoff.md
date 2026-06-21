@@ -177,7 +177,7 @@ If the user wants different subject images per platform:
 - deterministic randomization is better than obvious round-robin repetition
 
 Relevant prior script:
-- [scripts/build_dawnkaya_variants.py](./scripts/build_dawnkaya_variants.py)
+- [scripts/build_dawnkaya_variants.py](../../scripts/build_dawnkaya_variants.py)
 
 Use it as a pattern reference, not as a universal theme builder.
 It is specific to the earlier `dawnkaya` implementation.
@@ -209,7 +209,7 @@ If the user wants zero risk, stop before deployment and ask.
 
 The local reference copy of the image-generation skill is here:
 
-- [agents/skills/imagegen/SKILL.md](./agents/skills/imagegen/SKILL.md)
+- [agents/skills/imagegen/SKILL.md](../../agents/skills/imagegen/SKILL.md)
 
 Future agents should read that file before doing image-generation-heavy theme work.
 
@@ -225,7 +225,7 @@ Do not jump to CLI/API mode by default.
 ### When CLI Fallback Was Used
 
 Earlier work also added a CLI fallback path for bulk image generation:
-- [scripts/generate_dawnkaya_set3_cli.py](./scripts/generate_dawnkaya_set3_cli.py)
+- [scripts/generate_dawnkaya_set3_cli.py](../../scripts/generate_dawnkaya_set3_cli.py)
 
 That script was built specifically for `dawnkaya` and `kaya-set3`.
 
@@ -304,7 +304,7 @@ If asked to make a new theme from static pics, do this:
 
 1. Read this file.
 2. Read the copied imagegen skill:
-   - [agents/skills/imagegen/SKILL.md](./agents/skills/imagegen/SKILL.md)
+   - [agents/skills/imagegen/SKILL.md](../../agents/skills/imagegen/SKILL.md)
 3. Inspect prior theme archives under:
    - `~/Dropbox/gaming/retrogaming/retrodroid/themes/`
 4. Generate 2–3 concept previews first.
@@ -315,10 +315,10 @@ If asked to make a new theme from static pics, do this:
 ## Current Repo Pointers
 
 Useful files:
-- [config/droid-config.sh](./config/droid-config.sh)
-- [scripts/build_dawnkaya_variants.py](./scripts/build_dawnkaya_variants.py)
-- [scripts/generate_dawnkaya_set3_cli.py](./scripts/generate_dawnkaya_set3_cli.py)
-- [README.md](./README.md)
+- [config/droid-config.sh](../../config/droid-config.sh)
+- [scripts/build_dawnkaya_variants.py](../../scripts/build_dawnkaya_variants.py)
+- [scripts/generate_dawnkaya_set3_cli.py](../../scripts/generate_dawnkaya_set3_cli.py)
+- [README.md](../../README.md)
 
 Useful external source of truth:
 - `~/Dropbox/gaming/retrogaming/retrodroid/themes/`

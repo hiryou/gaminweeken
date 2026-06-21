@@ -158,7 +158,7 @@ Scripted on the host.
 If you want to refresh the downloadable emulator APK cache:
 
 ```bash
-./download_apks.sh [--dryrun]
+./download_apks.sh --dryrun
 ```
 
 If you have a locally obtained ES-DE APK, place it under:
@@ -186,7 +186,7 @@ The main setup script requires this APK and will fail if it is missing.
 Scripted on the host.
 
 ```bash
-./setup_droid.sh [--dryrun]
+./setup_droid.sh --dryrun
 ./setup_droid.sh
 ```
 

@@ -1,6 +1,6 @@
 {
   "emulator": "citron",
-  "filename": "app-mainline-release.apk",
+  "filename": "citron-mainline-release.apk",
   "source_url": "https://github.com/citron-neo/emulator/releases/download/2026-04-27/app-mainline-release.apk",
   "sha256": "f4029a23a93c1a17fd6266b00d057dc05f1cb22396dd4cea777f2f9bc220c854",
   "size": 22157733

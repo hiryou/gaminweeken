@@ -128,6 +128,12 @@
             <entry>com.antutu.ABenchMark/org.uzuy.uzuy_emu.activities.EmulationActivity</entry>
         </rule>
     </emulator>
+    <emulator name="VITA3K">
+        <!-- Sony PlayStation Vita emulator Vita3K -->
+        <rule type="androidpackage">
+            <entry>org.vita3k.emulator/.MainActivity</entry>
+        </rule>
+    </emulator>
     <emulator name="VITA3KZX">
         <!-- Sony PlayStation Vita emulator Vita3K ZX -->
         <rule type="androidpackage">

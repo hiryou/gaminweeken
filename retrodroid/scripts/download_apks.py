@@ -90,6 +90,20 @@ EMULATOR_REGISTRY = {
         "emulator": "ppsspp",
         "manifest_name": "ppsspp.json",
     },
+    "psvita_vita3k": {
+        "name": "Vita3K PS Vita Emulator",
+        "source_type": "resolver",
+        "resolver": "resolve_vita3k",
+        "emulator": "vita3k",
+        "manifest_name": "vita3k.json",
+    },
+    "ps3_aps3e": {
+        "name": "APS3E PS3 Emulator",
+        "source_type": "resolver",
+        "resolver": "resolve_aps3e",
+        "emulator": "aps3e",
+        "manifest_name": "aps3e.json",
+    },
     "n64_mupen64plus_ae": {
         "name": "Mupen64Plus AE (official nightly bundle)",
         "source_type": "resolver",
@@ -200,7 +214,7 @@ def resolve_aethersx2() -> DownloadSpec:
 
 
 def resolve_citron() -> DownloadSpec:
-    return resolve_github_release_asset(
+    spec = resolve_github_release_asset(
         "citron-neo/emulator",
         [
             r"app-mainline-release\.apk$",
@@ -208,6 +222,28 @@ def resolve_citron() -> DownloadSpec:
             r"\.apk$",
         ],
         include_prereleases=True,
+    )
+    return DownloadSpec(
+        url=spec.url,
+        filename=f"citron-mainline-release.apk",
+        archive_member=spec.archive_member,
+    )
+
+
+def resolve_vita3k() -> DownloadSpec:
+    spec = resolve_github_release_asset(
+        "Vita3K/Vita3K",
+        [
+            r"android-latest\.apk$",
+            r"Android.*\.apk$",
+            r"\.apk$",
+        ],
+        include_prereleases=True,
+    )
+    return DownloadSpec(
+        url=spec.url,
+        filename=f"vita3k-{spec.filename}",
+        archive_member=spec.archive_member,
     )
 
 
@@ -237,6 +273,16 @@ def resolve_ppsspp() -> DownloadSpec:
         url="https://www.ppsspp.org/files/1_20_4/ppsspp.apk",
         filename="ppsspp.apk",
     )
+
+
+# Docs ref for pinned GitHub release:
+# https://github.com/aenu1/aps3e/releases
+def resolve_aps3e() -> DownloadSpec:
+    return DownloadSpec(
+        url="https://github.com/aenu1/aps3e/releases/download/2.39/2.39.apk",
+        filename="aps3e-2.39.apk",
+    )
+
 
 def resolve_mupen64plus_ae() -> DownloadSpec:
     return DownloadSpec(

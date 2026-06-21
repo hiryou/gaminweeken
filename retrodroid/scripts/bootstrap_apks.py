@@ -87,6 +87,16 @@ APK_INSTALL_RULES = [
         "grep_tokens": ("ppsspp",),
     },
     {
+        "match_prefixes": ("vita3k", "Vita3K"),
+        "emulator": "vita3k",
+        "grep_tokens": ("vita3k",),
+    },
+    {
+        "match_prefixes": ("aps3e",),
+        "emulator": "aps3e",
+        "grep_tokens": ("aps3e",),
+    },
+    {
         "match_prefixes": ("duckstation", "DuckStation"),
         "emulator": "duckstation",
         "grep_tokens": ("duckstation",),
