@@ -365,6 +365,15 @@
         <theme>windows</theme>
     </system>
 	<system>
+        <name>xbox</name>
+        <fullname>Microsoft Xbox</fullname>
+        <path>%ROMPATH%/xbox</path>
+        <extension>.cci .CCI .cso .CSO .iso .ISO .xiso .XISO</extension>
+        <command label="X1-BOX (Standalone)">%EMULATOR_X1BOX% %ACTION%=android.intent.action.VIEW %DATA%=%ROMSAF%</command>
+        <platform>xbox</platform>
+        <theme>xbox</theme>
+    </system>
+	<system>
         <name>xbox360</name>
         <fullname>Microsoft Xbox 360</fullname>
         <path>%ROMPATH%/xbox360</path>

@@ -90,6 +90,20 @@ EMULATOR_REGISTRY = {
         "emulator": "ppsspp",
         "manifest_name": "ppsspp.json",
     },
+    "arcade_mame4droid": {
+        "name": "MAME4droid Current Arcade Emulator",
+        "source_type": "resolver",
+        "resolver": "resolve_mame4droid",
+        "emulator": "mame4droid",
+        "manifest_name": "mame4droid.json",
+    },
+    "xbox_x1box": {
+        "name": "X1-BOX Xbox Emulator",
+        "source_type": "resolver",
+        "resolver": "resolve_x1box",
+        "emulator": "x1box",
+        "manifest_name": "x1box.json",
+    },
     "psvita_vita3k": {
         "name": "Vita3K PS Vita Emulator",
         "source_type": "resolver",
@@ -245,6 +259,34 @@ def resolve_vita3k() -> DownloadSpec:
         filename=f"vita3k-{spec.filename}",
         archive_member=spec.archive_member,
     )
+
+
+def resolve_mame4droid() -> DownloadSpec:
+    spec = resolve_github_release_asset(
+        "seleuco/MAME4droid-Current",
+        [
+            r"MAME4droid\..*\.apk$",
+            r"MAME4droid.*\.apk$",
+            r"\.apk$",
+        ],
+    )
+    return DownloadSpec(
+        url=spec.url,
+        filename=spec.filename,
+        archive_member=spec.archive_member,
+    )
+
+
+def resolve_x1box() -> DownloadSpec:
+    return DownloadSpec(
+        url=(
+            "https://github.com/WinDroidEmulation/X1-BOX/releases/download/"
+            "X1-BOX-1.2.5/X1-BOX-1.2.5.apk"
+        ),
+        filename="X1-BOX-1.2.5.apk",
+    )
+    # for x1box fileset there's also this separate repo with much bigget fileset but older i.e. 2022
+    # https://github.com/K3V1991/Xbox-Emulator-Files/releases/tag/v1
 
 
 # Docs ref for pinned stable Android build:
@@ -442,9 +484,9 @@ def main() -> None:
                 if cached_path.is_file():
                     cached.append(cached_filename)
                     if args.dry_run or args.dryrun:
-                        print(f"[=] APK already downloaded: {cached_filename}")
+                        print(f"    APK already downloaded: {cached_filename}")
                     else:
-                        print(f"[=] Skipping existing APK: {cached_filename}")
+                        print(f"    Skipping existing APK: {cached_filename}")
                     print("-" * 50)
                     continue
 

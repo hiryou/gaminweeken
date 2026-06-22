@@ -261,6 +261,7 @@ up the emulator's system menu for you to customize things/exit game/etc
 - While in ES-DE, hold `hotkey` + Select = bring up Power menu, then:
   - L1 to restart
   - R1 to shutdown
+- While NOT in ES-DE, hold `Select` + `Start` = force close current app
 - `Select` + L1 = - volume
 - `Select` + R1 = + volume
 - `Select` + L2 = - screen brightness

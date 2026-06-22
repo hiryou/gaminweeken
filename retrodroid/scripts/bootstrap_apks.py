@@ -87,6 +87,16 @@ APK_INSTALL_RULES = [
         "grep_tokens": ("ppsspp",),
     },
     {
+        "match_prefixes": ("MAME4droid", "mame4droid"),
+        "emulator": "mame4droid",
+        "grep_tokens": ("mame4d",),
+    },
+    {
+        "match_prefixes": ("X1-BOX", "x1-box", "x1box"),
+        "emulator": "x1box",
+        "grep_tokens": ("x1-box", "x1box"),
+    },
+    {
         "match_prefixes": ("vita3k", "Vita3K"),
         "emulator": "vita3k",
         "grep_tokens": ("vita3k",),

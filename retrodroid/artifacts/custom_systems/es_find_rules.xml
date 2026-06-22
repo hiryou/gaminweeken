@@ -154,6 +154,12 @@
             <entry>emu.x360.mobile/emu.x360.mobile.X360MobileGameLaunchActivity</entry>
         </rule>
     </emulator>
+	<emulator name="X1BOX">
+        <!-- Microsoft Xbox emulator X1-BOX -->
+        <rule type="androidpackage">
+            <entry>com.izzy2lost.x1box/.LauncherActivity</entry>
+        </rule>
+    </emulator>
 	<emulator name="XBPLAY">
         <!-- Xbox Game Streaming XBPlay -->
         <rule type="androidpackage">
