@@ -268,8 +268,8 @@
         <name>ports</name>
         <fullname>Ports</fullname>
         <path>%ROMPATH%/ports</path>
-        <extension>.apk .APK</extension>
-        <command label="Android APK (Bridge)">%EMULATOR_EMULATOR-BRIDGE% %ACTION%=android.intent.action.VIEW %DATA%=%ROMSAF% %EXTRA_emulator%=ports-apk</command>
+        <extension>.apk .APK .xapk</extension>
+        <command label="Android APK (Bridge)">%EMULATOR_EMULATOR-BRIDGE% %ACTION%=android.intent.action.VIEW %DATA%=%ROMPROVIDER% %EXTRA_emulator%=ports-apk</command>
         <platform>ports</platform>
         <theme>ports</theme>
     </system>

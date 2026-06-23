@@ -1,3 +1,6 @@
+## Early worklog
+
+```shell
 $ nc -zv 192.168.0.99 5555
 Connection to 192.168.0.99 port 5555 [tcp/personal-agent] succeeded!
 
@@ -188,5 +191,12 @@ mkdir -p ~/retrodroid &&
 tar xzf - -C ~/retrodroid &&
 ~/retrodroid/scripts/setup.sh
 '
+```
+
+## Misc notes on emulators
+
+Some PS2 games have 16:9 resolution cheat [thread](https://forums.pcsx2.net/Thread-PCSX2-Widescreen-Game-Patches?page=182)
+Download [here](https://github.com/PS2-Widescreen/OPL-Widescreen-Cheats/blob/main/cheat_list.MD)
+
 
 

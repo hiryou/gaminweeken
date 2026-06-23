@@ -1,7 +1,7 @@
 # Emulator Bridge
 
-Generic Android bridge app for emulator launches that need app-specific logic between
-`ES-DE` and the final emulator activity.
+Generic Android bridge app for launches that need app-specific logic between
+`ES-DE` and the final target app.
 
 This app is intentionally headless.
 
@@ -10,44 +10,46 @@ This app is intentionally headless.
 - no interactive controls
 - behavior changes happen in code, then rebuild/reinstall
 
-This exists for emulators that are not simple "open this ROM file" targets. Typical cases:
+This exists for targets that are not simple "open this file in the final app" cases.
 
-- import-based emulators like `RPCSX`
-- emulators that expect a game serial / title ID instead of a raw file path
-- emulators that need app-private lookup or custom intent extras before launch
+Current use:
+
+- `ports-apk`
+  - inspect a selected `.apk`
+  - read its package name from the APK manifest
+  - if already installed, launch the installed app
+  - otherwise hand off to the Android package installer
 
 ## Intended flow
 
 1. `ES-DE` launches this app with:
    - a ROM URI in `%DATA%`
    - an emulator key in `%EXTRA_emulator%`
-2. The bridge resolves the target game using emulator-specific logic.
-3. The bridge launches the emulator's real activity with the correct action/extras.
+2. The bridge resolves the selected target using app-specific logic.
+3. The bridge either launches the installed app or starts the Android installer flow.
 
 ## Suggested ES-DE shape
 
 Example command once the app is wired into `es_find_rules.xml`:
 
 ```xml
-<command label="RPCSX (Bridge)">
+<command label="Android APK (Bridge)">
     %EMULATOR_EMULATOR-BRIDGE%
     %ACTION%=android.intent.action.VIEW
     %DATA%=%ROMSAF%
-    %EXTRA_emulator%=rpcsx
+    %EXTRA_emulator%=ports-apk
 </command>
 ```
 
-## Current scaffold
+## Current behavior
 
-The app currently provides:
+The app currently supports:
 
 - an exported, headless `MainActivity`
 - a generic request parser
-- a handler registry
-- an `RPCSX` handler stub
-- a `Vita3K` handler stub
+- a `ports-apk` bridge path
 
-It does not yet perform real deep-launch integration.
+It does not include the old RPCSX/Vita bridge experiments anymore.
 
 ## Dev getting started
 
@@ -99,7 +101,6 @@ After droid_setup i.e. installation of all apks, check if this app was installed
 $ adb -s "$DROID_ADB_SERIAL" shell pm list packages | grep io.retrodroid.emulatorbridge
 package:io.retrodroid.emulatorbridge
 ```
-
 
 
 

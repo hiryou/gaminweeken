@@ -13,4 +13,10 @@ sealed interface BridgeResult {
         override val message: String,
         override val detail: String? = null,
     ) : BridgeResult
+
+    data class Pending(
+        override val message: String,
+        override val detail: String? = null,
+        val packageName: String,
+    ) : BridgeResult
 }
