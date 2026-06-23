@@ -265,6 +265,15 @@
         <theme>psvita</theme>
     </system>
     <system>
+        <name>ports</name>
+        <fullname>Ports</fullname>
+        <path>%ROMPATH%/ports</path>
+        <extension>.apk .APK</extension>
+        <command label="Android APK (Bridge)">%EMULATOR_EMULATOR-BRIDGE% %ACTION%=android.intent.action.VIEW %DATA%=%ROMSAF% %EXTRA_emulator%=ports-apk</command>
+        <platform>ports</platform>
+        <theme>ports</theme>
+    </system>
+    <system>
         <name>snesh</name>
         <fullname>Nintendo SNES (Super Nintendo) Hacks</fullname>
         <path>%ROMPATH%/snesh</path>

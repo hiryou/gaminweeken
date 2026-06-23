@@ -90,6 +90,12 @@
             <entry>net.rpcsx/net.rpcsx.MainActivity</entry>
         </rule>
     </emulator>
+    <emulator name="EMULATOR-BRIDGE">
+        <!-- Retrodroid emulator/app bridge -->
+        <rule type="androidpackage">
+            <entry>io.retrodroid.emulatorbridge/.MainActivity</entry>
+        </rule>
+    </emulator>
     <emulator name="NYUSHU">
         <!-- Nintendo Switch emulator Nyushu -->
         <rule type="androidpackage">
