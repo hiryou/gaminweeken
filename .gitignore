@@ -3,6 +3,8 @@
 batodropin/build/
 batodropin/out/
 
+.DS_Store
+
 
 # Ignore local executable installers
 RetroGames/installers/

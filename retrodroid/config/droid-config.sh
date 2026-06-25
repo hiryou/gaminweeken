@@ -33,3 +33,7 @@ export ESDE_CUSTOM_SYSTEMS_DIR="${ESDE_ROOT}/custom_systems"
 #esde_custom_systems_dir=/sdcard/ES-DE/custom_systems
 # leave out for now
 #vita3k_root=/sdcard/Android/data/org.vita3k.emulator/files
+
+adb connect "$DROID_ADB_SERIAL"
+adb devices
+
