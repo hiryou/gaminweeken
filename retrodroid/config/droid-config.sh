@@ -34,6 +34,10 @@ export ESDE_CUSTOM_SYSTEMS_DIR="${ESDE_ROOT}/custom_systems"
 # leave out for now
 #vita3k_root=/sdcard/Android/data/org.vita3k.emulator/files
 
-adb connect "$DROID_ADB_SERIAL"
-adb devices
+# for later games convenient sync
+export LOCAL_RETROGAMING_DIR="/Users/longn/Downloads/retrogaming"
 
+if ! adb devices | awk '$2 == "device" {print $1}' | grep -qx "$DROID_ADB_SERIAL"; then
+    adb connect "$DROID_ADB_SERIAL"
+fi
+adb devices
